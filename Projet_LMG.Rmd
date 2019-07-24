@@ -1,0 +1,416 @@
+---
+title: "Projet :                                                         
+Modèle Linéaire Généralisé - Choix de Modèle - R"
+author: "Marlène Chevalier"
+date: "20 juillet 2019"
+output:
+  html_document:
+  number_sections: yes
+  toc: yes
+    
+---
+
+
+
+```{r setup, echo=FALSE, message=FALSE,warning=FALSE }
+#packages utilisés
+library(knitr)
+library(tidyverse)
+library(gridExtra)
+library(plotly)
+
+# parametrage des graphiques
+theme_set=(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12) ,axis.title=element_text(size=12)))  
+
+# chunk : options globales
+opts_chunk$set(echo=FALSE,
+               fig.align = "center",
+               fig.retina = 2,
+               fig.height=3.5,
+               fig.width = 7,
+               cache = TRUE,
+               cache.lazy = FALSE
+                )
+```
+
+
+#Sujet : Pluie à Bâle
+
+Il s'agit de proposer et valider un modèle qui permettra d'expliquer et de prédire la présence de pluie le lendemain à Bâle.
+Pour ce faire, les données disponibles sont sous forme de 2 fichiers : 
+
+  - un fichier d'entrainement *meteo.train.csv*
+  - un fichier test *meteo.test.csv* 
+
+Les fichiers contiennent des données météorologiques quotidiennes  enregistrées sur des journées entre juin 2010 et juin 2018 :  
+
+  - Valeurs moyenne, minimale et maximale : Température (°C), Humidité relative (%), Presssion (hPa), Nébulosité (%), Nébulosité forte (ciel élevé :  entre 7 et 13 km d'altitude) / moyenne (ciel moyen: entre 2 et 7km d'altitude) / faible (ciel bas : jusqu'à 2 km), Vitesse (km/h) et direction du vent(°) selon l'altitude(10m/80m/altitude avec 900hPa), Rafale de vent à 10 mètres (km/h)
+  - Valeur Totale : Précipitations (mm), Neige (cm), Ensoleillement (minutes), Rayonnement solaire (W/m²)
+
+Le fichier d'entrainement contient en plus la colonne *pluie.demain* qui indique la prédiction de pluie pour le lendemain. 
+Il s'agit de proposer une prediction *pluie.demain* qui sera à inclure dans le fichier test.
+Cette prédiction sera donc basée sur les conditions météorologiques de la veille. 
+
+# Exploration des données
+```{r explo, include=FALSE}
+## Chargement du jeu de données : base entrainement et base test 
+d.train=read.table("meteo.train.csv",header=TRUE,sep=",", na.string="")
+d.test=read.table("meteo.test.csv",header=TRUE,sep=",", na.string="")
+attach(d.train)
+
+##Résumé des données
+dim(d.train)
+dim(d.test)
+
+train.row=nrow(d.train)
+train.col=ncol(d.train)
+test.row=nrow(d.test)
+test.col=ncol(d.test)
+
+##Renommer les variables de la base d'entrainement
+colnames(d.train)[colnames(d.train)=="Temperature.daily.mean..2.m.above.gnd."]<-"Temp.mean"
+colnames(d.train)[colnames(d.train)=="Temperature.daily.max..2.m.above.gnd."]<-"Temp.max"
+colnames(d.train)[colnames(d.train)=="Temperature.daily.min..2.m.above.gnd."]<-"Temp.min"
+colnames(d.train)[colnames(d.train)=="Relative.Humidity.daily.mean..2.m.above.gnd."]="Humid.mean"
+colnames(d.train)[colnames(d.train)=="Relative.Humidity.daily.max..2.m.above.gnd."]="Humid.max"
+colnames(d.train)[colnames(d.train)=="Relative.Humidity.daily.min..2.m.above.gnd."]="Humid.min"
+colnames(d.train)[colnames(d.train)=="Mean.Sea.Level.Pressure.daily.mean..MSL."]="Pressure.mean"
+colnames(d.train)[colnames(d.train)=="Mean.Sea.Level.Pressure.daily.max..MSL."]="Pressure.max"
+colnames(d.train)[colnames(d.train)=="Mean.Sea.Level.Pressure.daily.min..MSL."]="Pressure.min"
+colnames(d.train)[colnames(d.train)=="Total.Precipitation.daily.sum..sfc."]="Precip.tot"
+colnames(d.train)[colnames(d.train)=="Snowfall.amount.raw.daily.sum..sfc." ]="Snow.tot"
+colnames(d.train)[colnames(d.train)=="Total.Cloud.Cover.daily.mean..sfc." ]="TotalCloud.mean"
+colnames(d.train)[colnames(d.train)=="High.Cloud.Cover.daily.mean..high.cld.lay." ]="HighCloud.mean"
+colnames(d.train)[colnames(d.train)=="Medium.Cloud.Cover.daily.mean..mid.cld.lay." ]="MediumCloud.mean"
+colnames(d.train)[colnames(d.train)=="Low.Cloud.Cover.daily.mean..low.cld.lay." ]="LowCloud.mean"
+colnames(d.train)[colnames(d.train)=="Total.Cloud.Cover.daily.max..sfc." ]="TotalCloud.max"
+colnames(d.train)[colnames(d.train)=="High.Cloud.Cover.daily.max..high.cld.lay." ]="HighCloud.max"
+colnames(d.train)[colnames(d.train)=="Medium.Cloud.Cover.daily.max..mid.cld.lay." ]="MediumCloud.max"
+colnames(d.train)[colnames(d.train)=="Low.Cloud.Cover.daily.max..low.cld.lay." ]="LowCloud.max"
+colnames(d.train)[colnames(d.train)=="Total.Cloud.Cover.daily.min..sfc." ]="TotalCloud.min"
+colnames(d.train)[colnames(d.train)=="High.Cloud.Cover.daily.min..high.cld.lay." ]="HighCloud.min"
+colnames(d.train)[colnames(d.train)=="Medium.Cloud.Cover.daily.min..mid.cld.lay." ]="MediumCloud.min"
+colnames(d.train)[colnames(d.train)=="Low.Cloud.Cover.daily.min..low.cld.lay." ]="LowCloud.min"
+colnames(d.train)[colnames(d.train)=="Sunshine.Duration.daily.sum..sfc." ]="Sunshine.tot"
+colnames(d.train)[colnames(d.train)=="Shortwave.Radiation.daily.sum..sfc." ]="Shortwave.tot"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.mean..10.m.above.gnd." ]="WindSpeed10m.mean"
+colnames(d.train)[colnames(d.train)=="Wind.Direction.daily.mean..10.m.above.gnd." ]="WindDir10m.mean"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.mean..80.m.above.gnd." ]="WindSpeed80m.mean"
+colnames(d.train)[colnames(d.train)== "Wind.Direction.daily.mean..80.m.above.gnd." ]="WindDir80m.mean"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.mean..900.mb." ]="WindSpeed900mb.mean"
+colnames(d.train)[colnames(d.train)== "Wind.Direction.daily.mean..900.mb."  ]="WindDir900mb.mean"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.max..10.m.above.gnd." ]="WindSpeed10m.max"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.max..80.m.above.gnd." ]="WindSpeed80m.max"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.max..900.mb." ]="WindSpeed900mb.max"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.min..10.m.above.gnd." ]="WindSpeed10m.min"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.min..80.m.above.gnd." ]="WindSpeed80m.min"
+colnames(d.train)[colnames(d.train)=="Wind.Speed.daily.min..900.mb." ]="WindSpeed900mb.min"
+colnames(d.train)[colnames(d.train)=="Wind.Gust.daily.mean..sfc." ]="WindGust.mean"
+colnames(d.train)[colnames(d.train)=="Wind.Gust.daily.max..sfc."  ]="WindGust.max"
+colnames(d.train)[colnames(d.train)=="Wind.Gust.daily.min..sfc."  ]="WindGust.min"
+
+##Renommer les variables de la base test
+colnames(d.test)[colnames(d.test)=="Temperature.daily.mean..2.m.above.gnd."]<-"Temp.mean"
+colnames(d.test)[colnames(d.test)=="Temperature.daily.max..2.m.above.gnd."]<-"Temp.max"
+colnames(d.test)[colnames(d.test)=="Temperature.daily.min..2.m.above.gnd."]<-"Temp.min"
+colnames(d.test)[colnames(d.test)=="Relative.Humidity.daily.mean..2.m.above.gnd."]="Humid.mean"
+colnames(d.test)[colnames(d.test)=="Relative.Humidity.daily.max..2.m.above.gnd."]="Humid.max"
+colnames(d.test)[colnames(d.test)=="Relative.Humidity.daily.min..2.m.above.gnd."]="Humid.min"
+colnames(d.test)[colnames(d.test)=="Mean.Sea.Level.Pressure.daily.mean..MSL."]="Pressure.mean"
+colnames(d.test)[colnames(d.test)=="Mean.Sea.Level.Pressure.daily.max..MSL."]="Pressure.max"
+colnames(d.test)[colnames(d.test)=="Mean.Sea.Level.Pressure.daily.min..MSL."]="Pressure.min"
+colnames(d.test)[colnames(d.test)=="Total.Precipitation.daily.sum..sfc."]="Precip.tot"
+colnames(d.test)[colnames(d.test)=="Snowfall.amount.raw.daily.sum..sfc." ]="Snow.tot"
+colnames(d.test)[colnames(d.test)=="Total.Cloud.Cover.daily.mean..sfc." ]="TotalCloud.mean"
+colnames(d.test)[colnames(d.test)=="High.Cloud.Cover.daily.mean..high.cld.lay." ]="HighCloud.mean"
+colnames(d.test)[colnames(d.test)=="Medium.Cloud.Cover.daily.mean..mid.cld.lay." ]="MediumCloud.mean"
+colnames(d.test)[colnames(d.test)=="Low.Cloud.Cover.daily.mean..low.cld.lay." ]="LowCloud.mean"
+colnames(d.test)[colnames(d.test)=="Total.Cloud.Cover.daily.max..sfc." ]="TotalCloud.max"
+colnames(d.test)[colnames(d.test)=="High.Cloud.Cover.daily.max..high.cld.lay." ]="HighCloud.max"
+colnames(d.test)[colnames(d.test)=="Medium.Cloud.Cover.daily.max..mid.cld.lay." ]="MediumCloud.max"
+colnames(d.test)[colnames(d.test)=="Low.Cloud.Cover.daily.max..low.cld.lay." ]="LowCloud.max"
+colnames(d.test)[colnames(d.test)=="Total.Cloud.Cover.daily.min..sfc." ]="TotalCloud.min"
+colnames(d.test)[colnames(d.test)=="High.Cloud.Cover.daily.min..high.cld.lay." ]="HighCloud.min"
+colnames(d.test)[colnames(d.test)=="Medium.Cloud.Cover.daily.min..mid.cld.lay." ]="MediumCloud.min"
+colnames(d.test)[colnames(d.test)=="Low.Cloud.Cover.daily.min..low.cld.lay." ]="LowCloud.min"
+colnames(d.test)[colnames(d.test)=="Sunshine.Duration.daily.sum..sfc." ]="Sunshine.tot"
+colnames(d.test)[colnames(d.test)=="Shortwave.Radiation.daily.sum..sfc." ]="Shortwave.tot"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.mean..10.m.above.gnd." ]="WindSpeed10m.mean"
+colnames(d.test)[colnames(d.test)=="Wind.Direction.daily.mean..10.m.above.gnd." ]="WindDir10m.mean"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.mean..80.m.above.gnd." ]="WindSpeed80m.mean"
+colnames(d.test)[colnames(d.test)== "Wind.Direction.daily.mean..80.m.above.gnd." ]="WindDir80m.mean"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.mean..900.mb." ]="WindSpeed900mb.mean"
+colnames(d.test)[colnames(d.test)== "Wind.Direction.daily.mean..900.mb."  ]="WindDir900mb.mean"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.max..10.m.above.gnd." ]="WindSpeed10m.max"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.max..80.m.above.gnd." ]="WindSpeed80m.max"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.max..900.mb." ]="WindSpeed900mb.max"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.min..10.m.above.gnd." ]="WindSpeed10m.min"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.min..80.m.above.gnd." ]="WindSpeed80m.min"
+colnames(d.test)[colnames(d.test)=="Wind.Speed.daily.min..900.mb." ]="WindSpeed900mb.min"
+colnames(d.test)[colnames(d.test)=="Wind.Gust.daily.mean..sfc." ]="WindGust.mean"
+colnames(d.test)[colnames(d.test)=="Wind.Gust.daily.max..sfc."  ]="WindGust.max"
+colnames(d.test)[colnames(d.test)=="Wind.Gust.daily.min..sfc."  ]="WindGust.min"
+
+
+```
+Le fichier metéo *entrainement* contient `r train.row` lignes et `r train.col` colonnes. Le fichier metéo *test* contient `r test.row` lignes et `r test.col` colonnes.
+
+####**Les précipitations mensuelles**
+
+A Bâle, les précipitations sont en moyenne plus abondantes entre mai et août. Les niveaux moyens sont néanmoins assez proches d'un mois sur l'autre ( entre 1mm et 2.8 mm *cf.graphe 1*) et les niveaux journaliers sont souvent loin de ces moyennes (dispersion importante *cf.graphe 2*).
+
+Sur la période observée (1244 journées entre juin 2010 et juin 2018), il a plu 647 jours soit une probabilité observée de présence de pluie de 52,2%. C'est en mai, juin et juillet que la proportion de journées pluvieuses est la plus importante (elle atteint 68% en juin) ; et en mars, septembre et novembre au contraire, elle ne reprensente qu'environ 40%.(*cf.graphe 3*)
+
+```{r plotprecipmens}
+# calcul des précipitations mensuelles : moy, var, min, max
+d.precipmonth =
+d.train %>% 
+  group_by(Month) %>% 
+  summarise (
+  MeanPrecip =mean(Precip.tot, na.rm=T),
+  VarPrecip =var(Precip.tot),
+  MinPrecip =min(Precip.tot, na.rm=F),
+  MaxPrecip =max(Precip.tot, na.rm=F))
+
+# graphique des precipitations mensuelles moyennes
+
+theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12) ,axis.title=element_text(hjust=1,size=10))) 
+
+# graphique p1 : précipitations mensuelles moyennes
+p1=ggplot(data=d.precipmonth, mapping=aes(x = as.factor(Month), y = MeanPrecip)) +
+  geom_bar(stat="identity", col="black",fill="lightblue",width = 1) + 
+  labs(subtitle="graphe1 : Moyenne",x="", y="Précipitations (mm)" ) +  
+  scale_y_continuous(breaks=seq(0,3,0.5),limits=c(0,3)) +
+  scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec"))
+
+# graphique p2 : précipitations mensuellesm oyennes et extremes
+p2=ggplot(data=d.train, mapping=aes(x = as.factor(Month), y = Precip.tot)) +
+  geom_boxplot(fill="lightblue", width = 1) + 
+  labs(subtitle="graphe 2 : Moyenne et Extrèmes",x="",y="Précipitations (mm)" ) +
+  scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec"))
+
+grid.arrange(p1,p2,ncol=2,top="Précipitations mensuelles à Bâle entre 2010 et 2018")
+       
+```
+
+
+
+```{r sanspluie}
+#Compter le nombre de jours de pluie et sans pluie
+d.train$pluie.auj=NA
+d.train$pluie.auj[(d.train$Precip.tot)!=0]=TRUE # jour avec pluie
+d.train[which(is.na(d.train[,"pluie.auj"])),"pluie.auj"]=FALSE # jour sans pluie
+
+# graphique des jours avec et sans pluie
+theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12),axis.title=element_text(hjust=1,size=10)))
+
+ggplot(data=d.train, mapping=aes(x = as.factor(Month), fill=pluie.auj)) +
+  labs(subtitle="graphe 3 : Nombre de jours avec et sans pluie", x="", y="Nombre de jours", fill="" ) +
+  geom_bar(col="black", position ="dodge") +
+  scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec")) + 
+ scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+```
+
+####**Les observations liées aux prévisions de précipitations**
+
+Examinons maintenant le comportement des variables météorologiques au regard de la prédiction qui a été faite pour le lendemain.
+
+  - La température du jour semble peu influencer les prévisions du lendemain (*cf. graphe 5* : le niveau médian de température est proche quelle que soit la prévision pour le lendemain). Le *graphe 4* ne montre pas non plus d'influence particulière de la température du jour sur le niveau de précipitation du jour ou ni sur la prévision du lendemain.
+  
+  - Le taux d'humidité du jour ne semble pas non plus avoir une influence marquante sur les prévisions météo (*cf graphe 7* : le niveau médian d'humidité du jour est très légèrement plus élevé lorsque on prévoit de la pluie).
+  
+   - La **pression athmosphérique du jour**, par contre, semble être un indicateur pour prévoir le temps du lendemain : en effet, on voit très clairement que le niveau médian est bas lorqu'on prévoit de la pluie pour le lendemain (*cf. graphe 9*). 
+   
+  - La **nébulosité du jour** semble aussi annoncer le temps du lendemain : plus elle est importante, plus on aura tendance à prévoir de la pluie pour le lendemain (*cf. graphe 11* : niveau médian de nébulosité plus fort lorsqu'on prévoit de la pluie). 
+  
+  - Les **rafales de vent ** ont également une influence sur les prévisions du lendemain (*cf. graphe 13* : le niveau médian des vitesses de rafale de vent est plus importantlorsqu'on prévoit de la pluie).
+   
+
+```{r lienvar}
+# calcul des directions de vent par quart N-E-S-O : WindDir10m.mean.quart / WindDir80m.mean.quart / WindDir900mb.mean.quart 
+d.train$QuartWDir10m=NA
+d.train$QuartWDir10m[(d.train$WindDir10m.mean<45)|(d.train$WindDir10m.mean>=315)]="Nord"
+d.train$QuartWDir10m[(d.train$WindDir10m.mean<135)&(d.train$WindDir10m.mean>=45)]="Est"
+d.train$QuartWDir10m[(d.train$WindDir10m.mean<225)&(d.train$WindDir10m.mean>=135)]="Sud"
+d.train$QuartWDir10m[(d.train$WindDir10m.mean<315)&(d.train$WindDir10m.mean>=225)]="Ouest"
+
+d.train$QuartWDir80m=NA
+d.train$QuartWDir80m[(d.train$WindDir80m.mean<45)|(d.train$WindDir80m.mean>=315)]="Nord"
+d.train$QuartWDir80m[(d.train$WindDir80m.mean<135)&(d.train$WindDir80m.mean>=45)]="Est"
+d.train$QuartWDir80m[(d.train$WindDir80m.mean<225)&(d.train$WindDir80m.mean>=135)]="Sud"
+d.train$QuartWDir80m[(d.train$WindDir80m.mean<315)&(d.train$WindDir80m.mean>=225)]="Ouest"
+
+d.train$QuartWDir900mb=NA
+d.train$QuartWDir900mb[(d.train$WindDir900mb.mean<45)|(d.train$WindDir900mb.mean>=315)]="Nord"
+d.train$QuartWDir900mb[(d.train$WindDir900mb.mean<135)&(d.train$WindDir900mb.mean>=45)]="Est"
+d.train$QuartWDir900mb[(d.train$WindDir900mb.mean<225)&(d.train$WindDir900mb.mean>=135)]="Sud"
+d.train$QuartWDir900mb[(d.train$WindDir900mb.mean<315)&(d.train$WindDir900mb.mean>=225)]="Ouest"
+
+
+theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12),axis.title=element_text(hjust=0.5,size=10)))
+
+# influence de la température
+p4=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Temp.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 4", x="Précipitation du jour (mm)", y="Température (°C)",col="Prévision lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p5=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Temp.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 5",x="",y="Température (°C)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p4,p5,ncol=2,top="Influence de la température du jour sur la prévision météo du lendemain")
+  
+# influence Précipitation et humidité
+p6=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Humid.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 6", x="Précipitation du jour (mm)", y="Humidité (%)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p7=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Humid.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 7",x="",y="Humidité (%)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p6,p7,ncol=2,top="Influence de l'humidité du jour sur la prévision météo du lendemain")
+
+# influence Précipitation et pression atmosphérique
+p8=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Pressure.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 8", x="Précipitation du jour (mm)", y="Pression (hPA)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p9=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Pressure.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 9",x="",y="Pression (hPA)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p8,p9,ncol=2,top="Influence de la pression atmosphérique du jour sur la prévision météo du lendemain")
+
+
+# influence Précipitation et nébulosité
+p10=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=TotalCloud.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 10", x="Précipitation du jour (mm)", y="Nébulosité (%)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p11=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = TotalCloud.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 11",x="",y="Nébulosité (%)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p10,p11,ncol=2,top="Influence de la nébulosité du jour sur la prévision météo du lendemain")
+
+
+# influence Précipitation et ensoleillement
+
+p12=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Sunshine.tot,col=pluie.demain)) +
+  labs(subtitle="graphe 12", x="Précipitation du jour (mm)", y="Ensoleillement (minute)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p13=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Sunshine.tot, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 13",x="",y="Ensoleillement (minute)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p12,p13,ncol=2,top="Influence de l'ensoleillement du jour sur la prévision météo du lendemain")
+
+# influence Précipitation et rafale de vent
+p14=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=WindGust.max,col=pluie.demain)) +
+  labs(subtitle="graphe 14", x="Précipitation du jour (mm)", y="Rafale de vent max (km/h)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p15=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = WindGust.max, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 15",x="",y="Rafale de vent max(km/h)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p14,p15,ncol=2,top="Influence des rafales de vent du jour sur la prévision météo du lendemain")
+
+
+# précipitations du jour et sens du vent
+p16=ggplot(data=d.train, mapping=aes(x = QuartWDir10m, y =Precip.tot )) +
+  labs(subtitle="graphe 16 ", y="Précipitation du jour (mm)", x="Dir.à 10m altitude") + geom_boxplot(fill="lightblue") 
+
+p17=ggplot(data=d.train, mapping=aes(x = QuartWDir80m, y =Precip.tot )) +
+  labs(subtitle="graphe 17", y="", x="Dir.à 80m altitude") + geom_boxplot(fill="lightblue")
+
+p18=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb, y =Precip.tot )) +
+  labs(subtitle="graphe 17", y="", x="Dir.à pression de 900hPA") + geom_boxplot(fill="lightblue")
+
+grid.arrange(p16,p17,p18,ncol=3,top="Influence de la direction du vent sur les précipitations du jour")
+
+# Prediction météo du lendemain et sens du vent
+# vent à 10m altitude
+
+# Météo du jour
+p19=ggplot(data=d.train, mapping=aes(x = QuartWDir10m , y =WindSpeed10m.mean, col=pluie.auj, size=10 )) +
+  labs(subtitle="graphe 19", y="Vitesse du vent (km/h)", x="Direction du vent", col="Météo du jour") + 
+  geom_point(size=5) +
+ scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+# Météo du lendemain
+p20=ggplot(data=d.train, mapping=aes(x = QuartWDir10m , y =WindSpeed10m.mean, col=pluie.demain )) +
+  labs(subtitle="graphe 20", y=" ", x="Direction du vent", col="Météo du lendemain", size="" ) + 
+  geom_point(size=5) +
+ scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+   
+grid.arrange(p19,p20,ncol=2,top="Influence du vent à 10 m d'altitude")
+
+# Prediction météo du lendemain et sens du vent
+# vent à 80m altitude
+
+# Météo du jour
+p21=ggplot(data=d.train, mapping=aes(x = QuartWDir80m , y =WindSpeed80m.mean, col=pluie.auj, size=10 )) +
+  labs(subtitle="graphe 21", y="Vitesse du vent (km/h)", x="Direction du vent", col="Météo du jour") + 
+  geom_point(size=5) +
+ scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+# Météo du lendemain
+p22=ggplot(data=d.train, mapping=aes(x = QuartWDir80m , y =WindSpeed80m.mean, col=pluie.demain )) +
+  labs(subtitle="graphe 22", y=" ", x="Direction du vent", col="Météo du lendemain", size="" ) + 
+  geom_point(size=5) +
+ scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+   
+grid.arrange(p21,p22,ncol=2,top="Influence du vent à 80 m d'altitude")
+
+
+# Prediction météo du lendemain et sens du vent
+# vent à 900hPA
+
+# Météo du jour
+p23=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb , y =WindSpeed900mb.mean, col=pluie.auj, size=10 )) +
+  labs(subtitle="graphe 23", y="Vitesse du vent (km/h)", x="Direction du vent", col="Météo du jour") + 
+  geom_point(size=5) +
+ scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+# Météo du lendemain
+p24=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb , y =WindSpeed900mb.mean, col=pluie.demain )) +
+  labs(subtitle="graphe 24", y=" ", x="Direction du vent", col="Météo du lendemain", size="" ) + 
+  geom_point(size=5) +
+ scale_color_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
+   
+grid.arrange(p23,p24,ncol=2,top="Influence du vent à une pression de 900 hPA")
+
+
+```
+
+
+# Choix du modèle 
+```{r choix}
+
+```
+
+# Prevision du temps du lendemain 
+```{r prevision}
+
+```
