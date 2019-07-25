@@ -5,9 +5,8 @@ author: "Marlène Chevalier"
 date: "20 juillet 2019"
 output:
   html_document:
-  number_sections: yes
-  toc: yes
-    
+    toc: true
+    number_sections: 3
 ---
 
 
@@ -17,7 +16,9 @@ output:
 library(knitr)
 library(tidyverse)
 library(gridExtra)
+library(kableExtra)
 library(plotly)
+library(leaps)
 
 # parametrage des graphiques
 theme_set=(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12) ,axis.title=element_text(size=12)))  
@@ -27,14 +28,14 @@ opts_chunk$set(echo=FALSE,
                fig.align = "center",
                fig.retina = 2,
                fig.height=3.5,
-               fig.width = 7,
-               cache = TRUE,
-               cache.lazy = FALSE
+               fig.width = 7
+               # cache = TRUE,
+               # cache.lazy = FALSE
                 )
 ```
 
 
-#Sujet : Pluie à Bâle
+# Sujet : Pluie à Bâle
 
 Il s'agit de proposer et valider un modèle qui permettra d'expliquer et de prédire la présence de pluie le lendemain à Bâle.
 Pour ce faire, les données disponibles sont sous forme de 2 fichiers : 
@@ -155,7 +156,7 @@ colnames(d.test)[colnames(d.test)=="Wind.Gust.daily.min..sfc."  ]="WindGust.min"
 ```
 Le fichier metéo *entrainement* contient `r train.row` lignes et `r train.col` colonnes. Le fichier metéo *test* contient `r test.row` lignes et `r test.col` colonnes.
 
-####**Les précipitations mensuelles**
+##**Les précipitations mensuelles**
 
 A Bâle, les précipitations sont en moyenne plus abondantes entre mai et août. Les niveaux moyens sont néanmoins assez proches d'un mois sur l'autre ( entre 1mm et 2.8 mm *cf.graphe 1*) et les niveaux journaliers sont souvent loin de ces moyennes (dispersion importante *cf.graphe 2*).
 
@@ -211,7 +212,7 @@ ggplot(data=d.train, mapping=aes(x = as.factor(Month), fill=pluie.auj)) +
  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
 ```
 
-####**Les observations liées aux prévisions de précipitations**
+##**Les observations liées aux prévisions de précipitations**
 
 Examinons maintenant le comportement des variables météorologiques au regard de la prédiction qui a été faite pour le lendemain.
 
@@ -219,12 +220,18 @@ Examinons maintenant le comportement des variables météorologiques au regard d
   
   - Le taux d'humidité du jour ne semble pas non plus avoir une influence marquante sur les prévisions météo (*cf graphe 7* : le niveau médian d'humidité du jour est très légèrement plus élevé lorsque on prévoit de la pluie).
   
-   - La **pression athmosphérique du jour**, par contre, semble être un indicateur pour prévoir le temps du lendemain : en effet, on voit très clairement que le niveau médian est bas lorqu'on prévoit de la pluie pour le lendemain (*cf. graphe 9*). 
+   - **La pression athmosphérique du jour**, par contre, semble être un indicateur pour prévoir le temps du lendemain : en effet, on voit très clairement que le niveau médian est bas lorqu'on prévoit de la pluie pour le lendemain (*cf. graphe 9*). 
    
-  - La **nébulosité du jour** semble aussi annoncer le temps du lendemain : plus elle est importante, plus on aura tendance à prévoir de la pluie pour le lendemain (*cf. graphe 11* : niveau médian de nébulosité plus fort lorsqu'on prévoit de la pluie). 
+  - **La nébulosité du jour** semble aussi annoncer le temps du lendemain : plus elle est importante, plus on aura tendance à prévoir de la pluie pour le lendemain (*cf. graphe 11* : niveau médian de nébulosité plus fort lorsqu'on prévoit de la pluie). 
   
-  - Les **rafales de vent ** ont également une influence sur les prévisions du lendemain (*cf. graphe 13* : le niveau médian des vitesses de rafale de vent est plus importantlorsqu'on prévoit de la pluie).
+  - **La durée d'enseillement du jour** a également une influence sur les prévisions du lendemain : moins l'ensoleillement est important, plus on aura tendance à prévoir de la pluie pour le lendemain (*cf. graphe 13* : le niveau médian du temps d'ensoleillement ).
+  
+   - **Les rafales de vent** ont également une influence sur les prévisions du lendemain (*cf. graphe 15* : le niveau médian des vitesses de rafale de vent est plus important lorsqu'on prévoit de la pluie).
    
+   - **Le sens et la direction du vent** de la journée semblent impacter significativement les prévisions pour le lendemain (*cf. graphes 16 à 24*). Les vents du nord et d'ouest amènent des pluie plus abondantes que les vents du sud et d'est (*cf. graphes 16 à 18*).
+Le vent d'ouest quelque soit leur vitesse sont souvent signe de pluie en journée et conduit à prévoir une journée du lendemain pluvieuse (*cf. graphes 19 à 24*).
+
+Avec ces observations graphiques, on a l'impression que la pression athmosphérique, la nébulosité, l'ensoleillement, les caractéristiques du vent d'une journée ont un impact sur la prévision météo pour le lendemain.
 
 ```{r lienvar}
 # calcul des directions de vent par quart N-E-S-O : WindDir10m.mean.quart / WindDir80m.mean.quart / WindDir900mb.mean.quart 
@@ -345,7 +352,7 @@ p17=ggplot(data=d.train, mapping=aes(x = QuartWDir80m, y =Precip.tot )) +
   labs(subtitle="graphe 17", y="", x="Dir.à 80m altitude") + geom_boxplot(fill="lightblue")
 
 p18=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb, y =Precip.tot )) +
-  labs(subtitle="graphe 17", y="", x="Dir.à pression de 900hPA") + geom_boxplot(fill="lightblue")
+  labs(subtitle="graphe 18", y="", x="Dir.à pression de 900hPA") + geom_boxplot(fill="lightblue")
 
 grid.arrange(p16,p17,p18,ncol=3,top="Influence de la direction du vent sur les précipitations du jour")
 
@@ -401,16 +408,151 @@ p24=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb , y =WindSpeed900mb.mean
    
 grid.arrange(p23,p24,ncol=2,top="Influence du vent à une pression de 900 hPA")
 
-
 ```
 
 
 # Choix du modèle 
-```{r choix}
+
+Il s'agit maintenant de trouver un modèle qui explique de façon satisfaisante la prévision "pluie.demain". Nous avons à disposition 46 variables explicatives.Il est donc trop fatidieux de tester tous les modèles possibles.
+Essayons de vérifier quelques corrélations intuitives permettant de ne pas selectionner des variables redondantes.
+
+**Vérification de corrélations**
+
+Testons les corrélations entre les variables de nébulosités, de Vitesse de vent, de directions du vents.
+Il apparait qu'il y a des corrélations statistiquement significatives (p-value de cor.test<5%) entre :
+    - les variables de direction du vent (entre 10m, 80m d'altitude et sous 900HPA)
+    - les variables de vitesse du vent (entre 10m, 80m d'altitude, sous 900HPA, rafale de vent)
+    - les variables de nébulosité (totale/forte/medium/faible)
+    
+## Méthode "exhaustive" 
+Dans un premier temps, utilisons une méthode de choix de modèle "manuelle" en sélectionnant les variables explicatives semblant pertinentes sur la base des influences et correlations observées. Les critères R2, R2 ajusté, CP Mallows, BIC permettront d'identifier les variables à choisir. (min CP Mallows et min BIC)
+
+Illustration de la démarche  :
+
+  - **Modèle 1** : 7 variables explicatives (pression moyenne, précipitation, humidité moyenne, nébulosité globale,direction et vitesse de vent à 10m altitude, ensoleillement ) 
+    
+*code R : choixman_mod1 = regsubsets (pluie.demain ~ Pressure.mean + Precip.tot + Humid.mean + TotalCloud.mean + WindSpeed10m.mean + WindDir10m.mean + Sunshine.tot, int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train)*
+
+```{r choixman1 }
+attach(d.train)
+
+# Tests de corrélation 
+#cor.test(WindDir10m.mean,WindDir80m.mean)
+#cor.test(WindDir10m.mean,WindDir900mb.mean)
+#cor.test(WindDir80m.mean,WindDir900mb.mean)
+
+#cor.test(WindSpeed10m.mean,WindSpeed80m.mean)
+#cor.test(WindSpeed10m.mean,WindSpeed900mb.mean)
+#cor.test(WindSpeed80m.mean,WindSpeed900mb.mean)
+
+choixman_mod1=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train)
+
+plot(choixman_mod1,scale = "Cp",col="green", main="Modèle 1 - Cp Mallows")
+plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 -BIC")
+
+```
+    
+    
+  - **Modèle 2** : 6 variables explicatives : remplacement des variables direction et vitesse de vent à 10m altitude par celles sous 900hPA et suppression de la variable ensoleillement  car les critères CP Mallows et BIC sont non satisfaisants sur ces variables dans le modèle 1
+    
+    (modèle 2 : pression moyenne, précipitation totale, humidité moyenne nébulosité totale, vitesse du vent à 900hPA)
+    
+
+```{r choixman2 }
+
+choixman_mod2=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed900mb.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=6,method="exhaustive",data=d.train)
+
+plot(choixman_mod2,scale = "Cp",col="green", main="Modèle 2 - Cp Mallows")
+plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
 
 ```
 
-# Prevision du temps du lendemain 
-```{r prevision}
+
+  - **Modèle 3** : 4 variables explicatives
+    (presssion moyenne, nébulosité totale, vitesse maximum du vent et direction du vent à 900hPA)
+    Les critères du modèle 3 sont satisfaisants pour toutes ses variables.
+    
+```{r choixman3 }
+
+choixman_mod3=regsubsets(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train)
+
+#plot(choixman_mod3,scale = "adjr2",col="green", main="Modèle 3 - critère R2 ajusté")
+plot(choixman_mod3,scale = "Cp",col="green", main="Modèle 3 - Cp Mallows")
+plot(choixman_mod3,scale = "bic", col="green", main="Modèle 3 - BIC")
 
 ```
+
+## Méthode "progressive"
+
+Dans cette étape, nous allons utiliser les méthodes pas à pas (progressive, descendante et ascendante) pour choisir les variables explicatives du modèle.
+
+Le modèle utilisé sera le modèle logistique : en effet, il permet d'expliquer une variable binaire (présence de pluie ou non demain) en fonction de variables explicatives sélectionnées. En R : *glm ( pluie.demain ~ variables explicatives, family = binomial )*
+
+Commençons par tester le modèle 3 (cf.methode exhaustive)
+
+  - **Modèle 3** : 4 variables explicatives
+    (presssion moyenne, nébulosité totale, vitesse maximum du vent et direction du vent à 900hPA)
+
+```{r choixprog_mod3}
+
+# modèle 3
+
+# descendante
+# step(glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial),data=d.train,direction="backward")
+
+#progressive
+step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,direction="both")
+
+mod3=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial)
+summary (mod3)
+
+
+```
+
+
+- **Modèle 1** : 7 variables explicatives
+
+```{r choixprog_mod1}
+# modèle 1
+step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,direction="both")
+
+mod1=glm(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,data=d.train,family=binomial)
+summary(mod1)
+
+```
+
+**Modèle 4** : nouveau modèle à 6 variables explicatives . Il combine le modèle 3 en ajoutant Precip.tot et Humid.mean
+
+```{r choixprog_mod4}
+# modèle 4
+step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Precip.tot+Humid.mean,direction="both")
+
+mod4=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Precip.tot+Humid.mean,data=d.train,family=binomial)
+summary(mod4)
+
+```
+ - **Modèle 5** : 4 variables explicatives modele 3
+    (presssion moyenne, nébulosité totale, vitesse maximum du vent et direction du vent à 900hPA)
+
+```{r choixprog_mod3}
+
+# modèle 5
+
+#progressive
+step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,direction="both")
+
+mod5=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial)
+summary (mod5)
+
+
+
+```
+
+
+
+# Validation du modèle
+
+
+
+# Prévsion de la météo du lendemain 
+
