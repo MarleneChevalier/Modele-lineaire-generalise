@@ -445,7 +445,10 @@ attach(d.train)
 #cor.test(WindSpeed10m.mean,WindSpeed900mb.mean)
 #cor.test(WindSpeed80m.mean,WindSpeed900mb.mean)
 
-choixman_mod1=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train)
+# on crée un vecteur de booléens, tirés aléatoirement tel que 80% du jeu de données soit utilisé pour identifier le modèle et 20% pour verifier l'ecart de prédiction
+train_80 = sample(c(T, F), nrow(d.train), replace = T, prob = c(.8, .2))
+
+choixman_mod1=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train[train_80,])
 
 plot(choixman_mod1,scale = "Cp",col="green", main="Modèle 1 - Cp Mallows")
 plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 -BIC")
@@ -460,7 +463,7 @@ plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 -BIC")
 
 ```{r choixman2 }
 
-choixman_mod2=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed900mb.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=6,method="exhaustive",data=d.train)
+choixman_mod2=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed900mb.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=6,method="exhaustive",data=d.train[train_80,])
 
 plot(choixman_mod2,scale = "Cp",col="green", main="Modèle 2 - Cp Mallows")
 plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
@@ -474,7 +477,7 @@ plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
     
 ```{r choixman3 }
 
-choixman_mod3=regsubsets(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train)
+choixman_mod3=regsubsets(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train[train_80,])
 
 #plot(choixman_mod3,scale = "adjr2",col="green", main="Modèle 3 - critère R2 ajusté")
 plot(choixman_mod3,scale = "Cp",col="green", main="Modèle 3 - Cp Mallows")
@@ -498,61 +501,235 @@ Commençons par tester le modèle 3 (cf.methode exhaustive)
 # modèle 3
 
 # descendante
-# step(glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial),data=d.train,direction="backward")
+# step(glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial),data=d[train_80, ],direction="backward")
 
 #progressive
-step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,direction="both")
+step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],direction="both")
 
-mod3=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial)
-summary (mod3)
+mod3=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
 
+#aic
+aic_mod3=AIC(mod3)
+#deviance residuelle
+deviance_mod3=deviance(mod3)
+#degres de liberté deviance résiduelle
+dfdeviance_mod3=df.residual(mod3)
+
+
+#modèle sans covariable
+mod0=glm(pluie.demain~1,data=d.train[train_80,],family=binomial)
+#aic
+aic_mod0=AIC(mod0)
+#deviance nulle
+deviance_mod0=deviance(mod0)
+#degres de liberté deviance nulle
+dfdeviance_mod0=df.residual(mod0)
 
 ```
 
 
-- **Modèle 1** : 7 variables explicatives
+  - **Modèle 1** : 7 variables explicatives
+(pression moyenne, précipitation, humidité moyenne, nébulosité globale,direction et vitesse de vent à 10m altitude, ensoleillement )
 
 ```{r choixprog_mod1}
 # modèle 1
-step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,direction="both")
+step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,direction="both")
 
-mod1=glm(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,data=d.train,family=binomial)
-summary(mod1)
+mod1=glm(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,data=d.train[train_80,],family=binomial)
+
+#aic
+aic_mod1=AIC(mod1)
+#deviance residuelle
+deviance_mod1=deviance(mod1)
+#degres de liberté deviance résiduelle
+dfdeviance_mod1=df.residual(mod1)
 
 ```
 
-**Modèle 4** : nouveau modèle à 6 variables explicatives . Il combine le modèle 3 en ajoutant Precip.tot et Humid.mean
+  - **Modèle 4** : nouveau modèle à 5 variables explicatives . Il combine le modèle 3 en ajoutant humidité moyenne
 
 ```{r choixprog_mod4}
-# modèle 4
-step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Precip.tot+Humid.mean,direction="both")
 
-mod4=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Precip.tot+Humid.mean,data=d.train,family=binomial)
-summary(mod4)
+# modèle 4 = modèle 3 + Humidité moyenne
+step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Humid.mean,direction="both")
+
+mod4=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Humid.mean,data=d.train[train_80,],family=binomial)
+
+#aic
+aic_mod4=AIC(mod4)
+#deviance residuelle
+deviance_mod4=deviance(mod4)
+#degres de liberté deviance résiduelle
+dfdeviance_mod4=df.residual(mod4)
 
 ```
- - **Modèle 5** : 4 variables explicatives modele 3
-    (presssion moyenne, nébulosité totale, vitesse maximum du vent et direction du vent à 900hPA)
 
-```{r choixprog_mod3}
+  - **Modèle 5** : 4 variables explicatives 
+    (modele 3 + température moyenne)
 
-# modèle 5
+```{r choixprog_mod5}
+
+# modèle 5 = modèle + température moyenne
 
 #progressive
-step(glm(pluie.demain~1,data=d.train,family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,direction="both")
+step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Temp.mean,data=d.train[train_80,],direction="both")
 
-mod5=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial)
-summary (mod5)
+mod5=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Temp.mean,data=d.train[train_80,],family=binomial)
+
+#aic
+aic_mod5=AIC(mod5)
+#deviance residuelle
+deviance_mod5=deviance(mod5)
+#degres de liberté deviance résiduelle
+dfdeviance_mod5=df.residual(mod5)
+
+```
+
+
+   - **Modèle 6 ** = Modèle à 3 variables explicatives . Il reprend le modèle 3 sans la variable vitesse du vent
+  
+```{r modele6}
+
+step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindDir900mb.mean,data=d.train[train_80,],direction="both")
+
+mod6=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
+
+#aic
+aic_mod6=AIC(mod6)
+#deviance residuelle
+deviance_mod6=deviance(mod6)
+#degres de liberté deviance résiduelle
+dfdeviance_mod6=df.residual(mod6)
+
+```
+
+```{r test}
+step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Sortwave.tot, LowCloud.min,WinGustmin, Month, data=d.train[train_80,],direction="both")
+
+mod6=glm(pluie.demain~pluie.demain~Sortwave.tot, LowCloud.min,WinGustmin, Month, data=d.train[train_80,]
+        b.mean,data=d.train[train_80,],family=binomial)
+
+#aic
+aic_mod6=AIC(mod6)
+#deviance residuelle
+deviance_mod6=deviance(mod6)
+#degres de liberté deviance résiduelle
+dfdeviance_mod6=df.residual(mod6)
+
+```
+
+
+
+Quelque soit l'echantillon aléatoire (=80% des individus du fichier d'entrainement), le modèle 3 est meilleur (AIC plus bas que le modele sans variable explicative et que les modèles 1, 4,  5 ou 6)
+
+
+**Modèle 3 : 4 variables explicatives**
+
+      - **Presssion athmosphérique moyenne** 
+      - **Nébulosité totale**
+      - **Vitesse maximum du vent à une pression de 900hPA** 
+      - **Direction du vent à une pression de 900hPA** 
+    
+```{r crit}
+
+table_res=data.frame(Modele=c("Modèle nul","Modèle 1","Modèle 3","Modèle 4","Modèle 5","Modèle 6"),AIC=c(aic_mod0,aic_mod1,aic_mod3,aic_mod4,aic_mod5,aic_mod6),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod3,deviance_mod4,deviance_mod5,deviance_mod6),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5,dfdeviance_mod6))
+                     
+kable(head(table_res), format="markdown", digits=0)
+
+```
+    
+
+Les coefficients du modèle 3 obtenu pour la presssion athmosphérique, la nébulosité totale, la direction du vent sont significativement différents de 0 quelque soit le tirage de l'echantillon (p-value < 1%) . La signiciativité du coefficient de la variable vitesse du vent n'est pas toujours vérifiée (pvalue peut être inférieure à 5% ou supérieure à 15% selon l'echantillon)  
+
+```{r affichecoef}
+
+kableExtra::kable(summary(mod3)$coefficients, format="markdown", digits=3) %>%
+  kable_styling(full_width = F)
 
 
 
 ```
 
 
+# Validation du modèle 
 
-# Validation du modèle
+   - **Test de la déviance**
+   
+Modèle 1    
+
+```{r testdeviance}
+# Modèle 1 
+# test par rapport au modèle sans covariable
+pchisq0_mod1=pchisq(deviance_mod0 - deviance_mod1, dfdeviance_mod0 - dfdeviance_mod1, lower = F)
+pchisq0_mod1
+# test par rapport au modèle saturé
+pchisqsat_mod1=pchisq(deviance_mod1, dfdeviance_mod1, lower = F)
+pchisqsat_mod1
+
+# Modèle 3 
+# test par rapport au modèle sans covariable
+pchisq0_mod3=pchisq(deviance_mod0 - deviance_mod3, dfdeviance_mod0 - dfdeviance_mod3, lower = F)
+pchisq0_mod3
+# test par rapport au modèle saturé
+pchisqsat_mod3=pchisq(deviance_mod3, dfdeviance_mod3, lower = F)
+pchisqsat_mod3
+
+# Modèle 4 
+# test par rapport au modèle sans covariable
+pchisq0_mod4=pchisq(deviance_mod0 - deviance_mod4, dfdeviance_mod0 - dfdeviance_mod4, lower = F)
+pchisq0_mod4
+# test par rapport au modèle saturé
+pchisqsat_mod4=pchisq(deviance_mod4, dfdeviance_mod4, lower = F)
+pchisqsat_mod4
+
+# Modèle 5 
+# test par rapport au modèle sans covariable
+pchisq0_mod5=pchisq(deviance_mod0 - deviance_mod5, dfdeviance_mod0 - dfdeviance_mod5, lower = F)
+pchisq0_mod5
+# test par rapport au modèle saturé
+pchisqsat_mod5=pchisq(deviance_mod5, dfdeviance_mod5, lower = F)
+pchisqsat_mod5
+
+# Modèle 5 
+# test par rapport au modèle sans covariable
+pchisq0_mod6=pchisq(deviance_mod0 - deviance_mod6, dfdeviance_mod0 - dfdeviance_mod6, lower = F)
+pchisq0_mod6
+# test par rapport au modèle saturé
+pchisqsat_mod6=pchisq(deviance_mod6, dfdeviance_mod6, lower = F)
+pchisqsat_mod6
+
+```
 
 
+   - **Test anova**
 
-# Prévsion de la météo du lendemain 
+```{r anova}
+anova(mod3, mod4, test = "LRT")
+
+anova(mod3, mod5, test = "LRT")
+
+anova(mod3, mod6, test = "LRT")
+
+
+anova(mod4, mod6, test = "LRT")
+
+
+anova(mod5, mod6, test = "LRT")
+```
+
+   - **Validation croisée**
+   
+```{r validcroi}
+#prédiction sur le modèle 3
+pred1=predict(mod3,d.train[!train_80,],type="response")
+mean1=mean(abs(pred1-d.train[!train_80,"pluie.demain"]),na.rm=T)
+mean1
+#prédiction sur le modèle 6
+pred2=predict(mod6,d.train[!train_80,],type="response")
+mean2=mean(abs(pred2-d.train[!train_80,"pluie.demain"]),na.rm=T) 
+mean2
+
+```
+
+# Prévision de la météo du lendemain 
 
