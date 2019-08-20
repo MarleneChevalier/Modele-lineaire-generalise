@@ -1,13 +1,42 @@
 ---
-title: "Projet :                                                         
-Modèle Linéaire Généralisé - Choix de Modèle - R"
+title: 'Projet : Modèle Linéaire Généralisé / Choix de Modèle - R'
 author: "Marlène Chevalier"
-date: "20 juillet 2019"
+date: "20 août 2019"
 output:
-  html_document:
-    toc: true
-    number_sections: 3
+    html_document:
+      toc: yes
+      toc_depth: 3
+      number_sections: 3
+      toc_float: yes
+      toc_color: Blue
 ---
+
+<style type="text/css">
+body{ /* Normal  */
+font-size: 16px;
+}
+td {  /* Table  */
+font-size: 16px;
+}
+h1.title {
+font-size: 28px;
+color: Blue;
+}
+
+h1 { /* Header 1 */
+font-size: 24px;
+color: Blue;
+}
+h2 { /* Header 2 */
+font-size: 20px;
+color: Blue;
+}
+h3 { /* Header 3 */
+font-size: 16px;
+font-family: "Times New Roman", Times, serif;
+color: Blue;
+}
+</style>
 
 
 
@@ -20,6 +49,8 @@ library(kableExtra)
 library(plotly)
 library(leaps)
 
+
+
 # parametrage des graphiques
 theme_set=(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12) ,axis.title=element_text(size=12)))  
 
@@ -29,7 +60,7 @@ opts_chunk$set(echo=FALSE,
                fig.retina = 2,
                fig.height=3.5,
                fig.width = 7
-               # cache = TRUE,
+                # cache = TRUE
                # cache.lazy = FALSE
                 )
 ```
@@ -37,18 +68,18 @@ opts_chunk$set(echo=FALSE,
 
 # Sujet : Pluie à Bâle
 
-Il s'agit de proposer et valider un modèle qui permettra d'expliquer et de prédire la présence de pluie le lendemain à Bâle.
+Il s'agit de proposer et valider un modèle qui permettra d'expliquer et de prédire la présence de pluie le jour suivant à Bâle.
 Pour ce faire, les données disponibles sont sous forme de 2 fichiers : 
 
   - un fichier d'entrainement *meteo.train.csv*
   - un fichier test *meteo.test.csv* 
 
-Les fichiers contiennent des données météorologiques quotidiennes  enregistrées sur des journées entre juin 2010 et juin 2018 :  
+Ces deux fichiers contiennent des données météorologiques quotidiennes  enregistrées sur des journées entre juin 2010 et juin 2018 :  
 
   - Valeurs moyenne, minimale et maximale : Température (°C), Humidité relative (%), Presssion (hPa), Nébulosité (%), Nébulosité forte (ciel élevé :  entre 7 et 13 km d'altitude) / moyenne (ciel moyen: entre 2 et 7km d'altitude) / faible (ciel bas : jusqu'à 2 km), Vitesse (km/h) et direction du vent(°) selon l'altitude(10m/80m/altitude avec 900hPa), Rafale de vent à 10 mètres (km/h)
   - Valeur Totale : Précipitations (mm), Neige (cm), Ensoleillement (minutes), Rayonnement solaire (W/m²)
 
-Le fichier d'entrainement contient en plus la colonne *pluie.demain* qui indique la prédiction de pluie pour le lendemain. 
+Le fichier d'entrainement contient, en plus, la colonne *pluie.demain* qui indique la prédiction de pluie pour le lendemain. 
 Il s'agit de proposer une prediction *pluie.demain* qui sera à inclure dans le fichier test.
 Cette prédiction sera donc basée sur les conditions météorologiques de la veille. 
 
@@ -110,6 +141,11 @@ colnames(d.train)[colnames(d.train)=="Wind.Gust.daily.mean..sfc." ]="WindGust.me
 colnames(d.train)[colnames(d.train)=="Wind.Gust.daily.max..sfc."  ]="WindGust.max"
 colnames(d.train)[colnames(d.train)=="Wind.Gust.daily.min..sfc."  ]="WindGust.min"
 
+##Remplacer la valeur de pluie.demain (True <-1;False <-0)
+d.train$pluie.demain.bin[(d.train$pluie.demain)==TRUE]=1
+d.train$pluie.demain.bin[(d.train$pluie.demain)==FALSE]=0
+
+
 ##Renommer les variables de la base test
 colnames(d.test)[colnames(d.test)=="Temperature.daily.mean..2.m.above.gnd."]<-"Temp.mean"
 colnames(d.test)[colnames(d.test)=="Temperature.daily.max..2.m.above.gnd."]<-"Temp.max"
@@ -154,13 +190,14 @@ colnames(d.test)[colnames(d.test)=="Wind.Gust.daily.min..sfc."  ]="WindGust.min"
 
 
 ```
-Le fichier metéo *entrainement* contient `r train.row` lignes et `r train.col` colonnes. Le fichier metéo *test* contient `r test.row` lignes et `r test.col` colonnes.
+Le fichier metéo *entrainement* contient `r train.row` lignes et `r train.col` colonnes. 
+Le fichier metéo *test* contient `r test.row` lignes et `r test.col` colonnes.
 
-##**Les précipitations mensuelles**
+##Les précipitations mensuelles
 
 A Bâle, les précipitations sont en moyenne plus abondantes entre mai et août. Les niveaux moyens sont néanmoins assez proches d'un mois sur l'autre ( entre 1mm et 2.8 mm *cf.graphe 1*) et les niveaux journaliers sont souvent loin de ces moyennes (dispersion importante *cf.graphe 2*).
 
-Sur la période observée (1244 journées entre juin 2010 et juin 2018), il a plu 647 jours soit une probabilité observée de présence de pluie de 52,2%. C'est en mai, juin et juillet que la proportion de journées pluvieuses est la plus importante (elle atteint 68% en juin) ; et en mars, septembre et novembre au contraire, elle ne reprensente qu'environ 40%.(*cf.graphe 3*)
+Sur la période observée (1244 journées entre juin 2010 et juin 2018), il a plu 647 jours soit une probabilité observée de présence de pluie de 52,2%. C'est en mai, juin et juillet que la proportion de journées pluvieuses est la plus importante (elle atteint 68% en juin) ; et en mars, septembre et novembre au contraire, elle ne reprensente qu'environ 40%.(à partir du *graphe 3*)
 
 ```{r plotprecipmens}
 # calcul des précipitations mensuelles : moy, var, min, max
@@ -184,7 +221,7 @@ p1=ggplot(data=d.precipmonth, mapping=aes(x = as.factor(Month), y = MeanPrecip))
   scale_y_continuous(breaks=seq(0,3,0.5),limits=c(0,3)) +
   scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec"))
 
-# graphique p2 : précipitations mensuellesm oyennes et extremes
+# graphique p2 : précipitations mensuelles moyennes et extremes
 p2=ggplot(data=d.train, mapping=aes(x = as.factor(Month), y = Precip.tot)) +
   geom_boxplot(fill="lightblue", width = 1) + 
   labs(subtitle="graphe 2 : Moyenne et Extrèmes",x="",y="Précipitations (mm)" ) +
@@ -212,11 +249,11 @@ ggplot(data=d.train, mapping=aes(x = as.factor(Month), fill=pluie.auj)) +
  scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
 ```
 
-##**Les observations liées aux prévisions de précipitations**
+##Les observations liées aux prévisions de précipitations
 
 Examinons maintenant le comportement des variables météorologiques au regard de la prédiction qui a été faite pour le lendemain.
 
-  - La température du jour semble peu influencer les prévisions du lendemain (*cf. graphe 5* : le niveau médian de température est proche quelle que soit la prévision pour le lendemain). Le *graphe 4* ne montre pas non plus d'influence particulière de la température du jour sur le niveau de précipitation du jour ou ni sur la prévision du lendemain.
+  - La température du jour semble peu influencer les prévisions du lendemain (*cf. graphe 5* : le niveau médian de température est proche quelle que soit la prévision pour le lendemain). Le *graphe 4* ne montre pas non plus d'influence particulière de la température du jour sur la prévision du lendemain (répartition similaire des prévisions de journées pluvieuses ou non) Par contre lorsque le niveau de précipitation du jour est important, on aura tendance à prévoir de la pluie pour le lendemain (points bleus plus représentéés pour un niveau élévé de précipitations)
   
   - Le taux d'humidité du jour ne semble pas non plus avoir une influence marquante sur les prévisions météo (*cf graphe 7* : le niveau médian d'humidité du jour est très légèrement plus élevé lorsque on prévoit de la pluie).
   
@@ -229,7 +266,7 @@ Examinons maintenant le comportement des variables météorologiques au regard d
    - **Les rafales de vent** ont également une influence sur les prévisions du lendemain (*cf. graphe 15* : le niveau médian des vitesses de rafale de vent est plus important lorsqu'on prévoit de la pluie).
    
    - **Le sens et la direction du vent** de la journée semblent impacter significativement les prévisions pour le lendemain (*cf. graphes 16 à 24*). Les vents du nord et d'ouest amènent des pluie plus abondantes que les vents du sud et d'est (*cf. graphes 16 à 18*).
-Le vent d'ouest quelque soit leur vitesse sont souvent signe de pluie en journée et conduit à prévoir une journée du lendemain pluvieuse (*cf. graphes 19 à 24*).
+Les vents d'ouest quelque soit leur vitesse sont souvent signe de pluie en journée et conduit à prévoir une journée du lendemain pluvieuse (*cf. graphes 19 à 24*).
 
 Avec ces observations graphiques, on a l'impression que la pression athmosphérique, la nébulosité, l'ensoleillement, les caractéristiques du vent d'une journée ont un impact sur la prévision météo pour le lendemain.
 
@@ -268,7 +305,7 @@ p5=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Temp.mean, fill = plui
   scale_x_discrete(labels=c("","")) +  
   scale_fill_manual(values=c("yellow","lightblue"),label=c("journée sans pluie","journée pluvieuse"))
 
-grid.arrange(p4,p5,ncol=2,top="Influence de la température du jour sur la prévision météo du lendemain")
+grid.arrange(p4,p5,ncol=2,top="  Influence de la température du jour sur la prévision météo du lendemain")
   
 # influence Précipitation et humidité
 p6=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Humid.mean,col=pluie.demain)) +
@@ -416,13 +453,68 @@ grid.arrange(p23,p24,ncol=2,top="Influence du vent à une pression de 900 hPA")
 Il s'agit maintenant de trouver un modèle qui explique de façon satisfaisante la prévision "pluie.demain". Nous avons à disposition 46 variables explicatives.Il est donc trop fatidieux de tester tous les modèles possibles.
 Essayons de vérifier quelques corrélations intuitives permettant de ne pas selectionner des variables redondantes.
 
-**Vérification de corrélations**
+## Vérification de corrélations
 
-Testons les corrélations entre les variables de nébulosités, de Vitesse de vent, de directions du vents.
+Testons les corrélations entre les variables de nébulosités, de vitesses de vent, de directions du vent.
 Il apparait qu'il y a des corrélations statistiquement significatives (p-value de cor.test<5%) entre :
-    - les variables de direction du vent (entre 10m, 80m d'altitude et sous 900HPA)
-    - les variables de vitesse du vent (entre 10m, 80m d'altitude, sous 900HPA, rafale de vent)
-    - les variables de nébulosité (totale/forte/medium/faible)
+
+   - les variables de direction du vent (entre 10m, 80m d'altitude et sous 900HPA)
+   - les variables de vitesse du vent (entre 10m, 80m d'altitude, sous 900HPA, rafale de vent)
+   - les variables de nébulosité (totale/forte/medium/faible)
+   
+   
+```{r cor1}
+# Tests de corrélation 
+WDcor10m10m=1
+WDcor80m80m=1
+WDcor900900=1
+WDcor10m80m=cor(d.train$WindDir10m.mean,d.train$WindDir80m.mean, method="pearson")
+WDcor10m900=cor(d.train$WindDir10m.mean,d.train$WindDir900mb.mean,method="pearson")
+WDcor80m900=cor(d.train$WindDir80m.mean,d.train$WindDir900mb.mean,method="pearson")
+
+table_cordir=data.frame(Direction_Vent=c("10m","80m","900HPa"),a_10m= c(WDcor10m10m,WDcor10m80m,WDcor10m900),a_80m=c(WDcor10m80m,WDcor80m80m,WDcor80m900),sous_900Hpa=c(WDcor10m900,WDcor80m900,WDcor900900))
+                     
+kable(head(table_cordir),format="markdown",caption="correlation des var direction du vent",digits=2)
+
+WScor10m10m=1
+WScor80m80m=1
+WScor900900=1
+WScor10m80m=cor(d.train$WindSpeed10m.mean,d.train$WindSpeed80m.mean,method="pearson")
+WScor10m900=cor(d.train$WindSpeed10m.mean,d.train$WindSpeed900mb.mean,method="pearson")
+WScor80m900=cor(d.train$WindSpeed80m.mean,d.train$WindSpeed900mb.mean,method="pearson")
+
+
+table_corvit=data.frame(Vitesse_Vent=c("10m","80m","900HPa"),a_10m=c(WScor10m10m,WScor10m80m,WScor10m900), a_80m=c(WScor10m80m,WScor80m80m,WScor80m900),sous_900HPa=c(WScor10m900,WScor80m900,WScor900900))
+kable(head(table_corvit), format="markdown",caption="correlation des var vitesse du vent", digits=2)
+
+WGcorminmin=1
+WGcormaxmax=1
+WGcormoymoy=1
+WGcorminmean=cor(d.train$WindGust.min,d.train$WindGust.mean,method="pearson")
+WGcorminmax=cor(d.train$WindGust.min,d.train$WindGust.max,method="pearson")
+WGcormeanmax=cor(d.train$WindGust.mean,d.train$WindGust.max,method="pearson")
+
+
+table_corraf=data.frame(Rafale_Vent=c("min","moy","max"),min=c(WGcorminmin,WGcorminmean,WGcorminmax), moy=c(WGcorminmean,WGcormoymoy,WGcormeanmax),max=c(WGcorminmax,WGcormeanmax,WGcormaxmax))
+kable(head(table_corraf), format="markdown",caption="correlation des var rafale de vent",digits=2)
+
+Clcortot=1
+Clcorhigh=1
+Clcormedium=1
+Clcorlow=1
+
+Clcortothigh=cor(d.train$TotalCloud.mean,d.train$HighCloud.mean,method="pearson")
+Clcortotmed=cor(d.train$TotalCloud.mean,d.train$MediumCloud.mean,method="pearson")
+Clcortotlow=cor(d.train$TotalCloud.mean,d.train$LowCloud.mean,method="pearson")
+Clcorhighmed=cor(d.train$MediumCloud.mean,d.train$HighCloud.mean,method="pearson")
+Clcorhighlow=cor(d.train$LowCloud.mean,d.train$HighCloud.mean,method="pearson")
+Clcormedlow=cor(d.train$MediumCloud.mean,d.train$LowCloud.mean,method="pearson")
+
+table_corcloud=data.frame(Nebulosite_Moyenne=c("Totale","Forte","Medium","Faible"),Totale=c(Clcortot,Clcortothigh,Clcortotmed,Clcortotlow),Forte=c(Clcortothigh,Clcorhigh,Clcorhighmed,Clcorhighlow), Medium=c(Clcortotmed,Clcorhighmed,Clcormedium,Clcormedlow), Faible=c(Clcortotlow,Clcorhighlow,Clcormedlow,Clcorlow))
+kable(head(table_corcloud), format="markdown", caption="correlation des var nébulosité",digits=2)
+
+
+```
     
 ## Méthode "exhaustive" 
 Dans un premier temps, utilisons une méthode de choix de modèle "manuelle" en sélectionnant les variables explicatives semblant pertinentes sur la base des influences et correlations observées. Les critères R2, R2 ajusté, CP Mallows, BIC permettront d'identifier les variables à choisir. (min CP Mallows et min BIC)
@@ -434,21 +526,12 @@ Illustration de la démarche  :
 *code R : choixman_mod1 = regsubsets (pluie.demain ~ Pressure.mean + Precip.tot + Humid.mean + TotalCloud.mean + WindSpeed10m.mean + WindDir10m.mean + Sunshine.tot, int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train)*
 
 ```{r choixman1 }
-attach(d.train)
-
-# Tests de corrélation 
-#cor.test(WindDir10m.mean,WindDir80m.mean)
-#cor.test(WindDir10m.mean,WindDir900mb.mean)
-#cor.test(WindDir80m.mean,WindDir900mb.mean)
-
-#cor.test(WindSpeed10m.mean,WindSpeed80m.mean)
-#cor.test(WindSpeed10m.mean,WindSpeed900mb.mean)
-#cor.test(WindSpeed80m.mean,WindSpeed900mb.mean)
 
 # on crée un vecteur de booléens, tirés aléatoirement tel que 80% du jeu de données soit utilisé pour identifier le modèle et 20% pour verifier l'ecart de prédiction
 train_80 = sample(c(T, F), nrow(d.train), replace = T, prob = c(.8, .2))
 
-choixman_mod1=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train[train_80,])
+choixman_mod1=regsubsets(pluie.demain.bin~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,int=T,nbest=1,nvmax=7,method="exhaustive",data=d.train[train_80,])
+
 
 plot(choixman_mod1,scale = "Cp",col="green", main="Modèle 1 - Cp Mallows")
 plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 -BIC")
@@ -458,12 +541,13 @@ plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 -BIC")
     
   - **Modèle 2** : 6 variables explicatives : remplacement des variables direction et vitesse de vent à 10m altitude par celles sous 900hPA et suppression de la variable ensoleillement  car les critères CP Mallows et BIC sont non satisfaisants sur ces variables dans le modèle 1
     
-    (modèle 2 : pression moyenne, précipitation totale, humidité moyenne nébulosité totale, vitesse du vent à 900hPA)
+    (Modèle 2 : pression moyenne, précipitation totale, humidité moyenne nébulosité totale, vitesse du vent à 900hPA)
     
 
 ```{r choixman2 }
 
-choixman_mod2=regsubsets(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed900mb.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=6,method="exhaustive",data=d.train[train_80,])
+choixman_mod2=regsubsets(pluie.demain.bin~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed900mb.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=6,method="exhaustive",data=d.train[train_80,])
+
 
 plot(choixman_mod2,scale = "Cp",col="green", main="Modèle 2 - Cp Mallows")
 plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
@@ -477,9 +561,9 @@ plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
     
 ```{r choixman3 }
 
-choixman_mod3=regsubsets(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train[train_80,])
+choixman_mod3=regsubsets(pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train[train_80,])
 
-#plot(choixman_mod3,scale = "adjr2",col="green", main="Modèle 3 - critère R2 ajusté")
+
 plot(choixman_mod3,scale = "Cp",col="green", main="Modèle 3 - Cp Mallows")
 plot(choixman_mod3,scale = "bic", col="green", main="Modèle 3 - BIC")
 
@@ -501,12 +585,12 @@ Commençons par tester le modèle 3 (cf.methode exhaustive)
 # modèle 3
 
 # descendante
-# step(glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial),data=d[train_80, ],direction="backward")
+# step(glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial),data=d[train_80, ],direction="backward")
 
 #progressive
-step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],direction="both")
+step(glm(pluie.demain.bin~1,data=d.train[train_80,],family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],direction="both")
 
-mod3=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
+mod3=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
 
 #aic
 aic_mod3=AIC(mod3)
@@ -517,7 +601,7 @@ dfdeviance_mod3=df.residual(mod3)
 
 
 #modèle sans covariable
-mod0=glm(pluie.demain~1,data=d.train[train_80,],family=binomial)
+mod0=glm(pluie.demain.bin~1,data=d.train[train_80,],family=binomial)
 #aic
 aic_mod0=AIC(mod0)
 #deviance nulle
@@ -533,9 +617,9 @@ dfdeviance_mod0=df.residual(mod0)
 
 ```{r choixprog_mod1}
 # modèle 1
-step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,direction="both")
+step(glm(pluie.demain.bin~1,data=d.train[train_80,],family=binomial),pluie.demain.bin~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,direction="both")
 
-mod1=glm(pluie.demain~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,data=d.train[train_80,],family=binomial)
+mod1=glm(pluie.demain.bin~Pressure.mean+Precip.tot+Humid.mean+TotalCloud.mean+WindSpeed10m.mean+WindDir10m.mean+Sunshine.tot,data=d.train[train_80,],family=binomial)
 
 #aic
 aic_mod1=AIC(mod1)
@@ -551,9 +635,9 @@ dfdeviance_mod1=df.residual(mod1)
 ```{r choixprog_mod4}
 
 # modèle 4 = modèle 3 + Humidité moyenne
-step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Humid.mean,direction="both")
+step(glm(pluie.demain.bin~1,data=d.train[train_80,],family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Humid.mean,direction="both")
 
-mod4=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Humid.mean,data=d.train[train_80,],family=binomial)
+mod4=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Humid.mean,data=d.train[train_80,],family=binomial)
 
 #aic
 aic_mod4=AIC(mod4)
@@ -572,9 +656,9 @@ dfdeviance_mod4=df.residual(mod4)
 # modèle 5 = modèle + température moyenne
 
 #progressive
-step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Temp.mean,data=d.train[train_80,],direction="both")
+step(glm(pluie.demain.bin~1,data=d.train[train_80,],family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Temp.mean,data=d.train[train_80,],direction="both")
 
-mod5=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Temp.mean,data=d.train[train_80,],family=binomial)
+mod5=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindSpeed900mb.max+WindDir900mb.mean+Temp.mean,data=d.train[train_80,],family=binomial)
 
 #aic
 aic_mod5=AIC(mod5)
@@ -590,24 +674,9 @@ dfdeviance_mod5=df.residual(mod5)
   
 ```{r modele6}
 
-step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Pressure.mean+TotalCloud.mean+WindDir900mb.mean,data=d.train[train_80,],direction="both")
+step(glm(pluie.demain.bin~1,data=d.train[train_80,],family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindDir900mb.mean,data=d.train[train_80,],direction="both")
 
-mod6=glm(pluie.demain~Pressure.mean+TotalCloud.mean+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
-
-#aic
-aic_mod6=AIC(mod6)
-#deviance residuelle
-deviance_mod6=deviance(mod6)
-#degres de liberté deviance résiduelle
-dfdeviance_mod6=df.residual(mod6)
-
-```
-
-```{r test}
-step(glm(pluie.demain~1,data=d.train[train_80,],family=binomial),pluie.demain~Sortwave.tot, LowCloud.min,WinGustmin, Month, data=d.train[train_80,],direction="both")
-
-mod6=glm(pluie.demain~pluie.demain~Sortwave.tot, LowCloud.min,WinGustmin, Month, data=d.train[train_80,]
-        b.mean,data=d.train[train_80,],family=binomial)
+mod6=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
 
 #aic
 aic_mod6=AIC(mod6)
@@ -625,16 +694,16 @@ Quelque soit l'echantillon aléatoire (=80% des individus du fichier d'entrainem
 
 **Modèle 3 : 4 variables explicatives**
 
-      - **Presssion athmosphérique moyenne** 
-      - **Nébulosité totale**
-      - **Vitesse maximum du vent à une pression de 900hPA** 
-      - **Direction du vent à une pression de 900hPA** 
+  - ** Presssion athmosphérique moyenne ** 
+  - ** Nébulosité totale **
+  - ** Vitesse maximum du vent à une pression de 900hPA ** 
+  - ** Direction du vent à une pression de 900hPA ** 
     
 ```{r crit}
 
-table_res=data.frame(Modele=c("Modèle nul","Modèle 1","Modèle 3","Modèle 4","Modèle 5","Modèle 6"),AIC=c(aic_mod0,aic_mod1,aic_mod3,aic_mod4,aic_mod5,aic_mod6),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod3,deviance_mod4,deviance_mod5,deviance_mod6),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5,dfdeviance_mod6))
+table_res2=data.frame(Modele=c("Modèle nul","Modèle 1","Modèle 3","Modèle 4","Modèle 5","Modèle 6"),AIC=c(aic_mod0,aic_mod1,aic_mod3,aic_mod4,aic_mod5,aic_mod6),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod3,deviance_mod4,deviance_mod5,deviance_mod6),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5,dfdeviance_mod6))
                      
-kable(head(table_res), format="markdown", digits=0)
+kable(head(table_res2), format="markdown", digits=0)
 
 ```
     
@@ -642,9 +711,9 @@ kable(head(table_res), format="markdown", digits=0)
 Les coefficients du modèle 3 obtenu pour la presssion athmosphérique, la nébulosité totale, la direction du vent sont significativement différents de 0 quelque soit le tirage de l'echantillon (p-value < 1%) . La signiciativité du coefficient de la variable vitesse du vent n'est pas toujours vérifiée (pvalue peut être inférieure à 5% ou supérieure à 15% selon l'echantillon)  
 
 ```{r affichecoef}
-
-kableExtra::kable(summary(mod3)$coefficients, format="markdown", digits=3) %>%
-  kable_styling(full_width = F)
+#
+#kableExtra::kable(summary(mod3)$coefficients, format="markdown", digits=3) %>%
+#  kable_styling(full_width = F)
 
 
 
