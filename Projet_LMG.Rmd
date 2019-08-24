@@ -54,16 +54,14 @@ library(kableExtra)
 library(plotly)
 library(leaps)
 
-
-
 # parametrage des graphiques
-theme_set=(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12) ,axis.title=element_text(size=12)))  
+theme_set=(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12) ,axis.title=element_text(size=10)))  
 
 # chunk : options globales
 opts_chunk$set(echo=FALSE,
                fig.align = "center",
                fig.retina = 2,
-               fig.height=3.5,
+               fig.height=4,
                fig.width = 7
                 # cache = TRUE
                # cache.lazy = FALSE
@@ -92,7 +90,8 @@ Ces deux fichiers contiennent des données météorologiques quotidiennes  enreg
           Nébulosité faible (ciel bas : jusqu'à 2 km), 
       - Vitesse (km/h) selon l'altitude(10m / 80m / altitude avec 900hPa),  
       - Direction du vent (°) selon l'altitude(10m / 80m / altitude avec 900hPa),      
-      - Rafale de vent à 10 mètres (km/h)   
+      - Rafale de vent à 10 mètres (km/h)     
+      
       
   - Valeur Totale :   
       - Précipitations (mm),   
@@ -401,7 +400,6 @@ p15=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = WindGust.max, fill = 
 
 grid.arrange(p14,p15,ncol=2,top="Influence des rafales de vent du jour sur la prévision météo du lendemain")
 
-
 # précipitations du jour et sens du vent
 p16=ggplot(data=d.train, mapping=aes(x = QuartWDir10m, y =Precip.tot )) +
   labs(subtitle="graphe 16 ", y="Précipitation du jour (mm)", x="Dir.à 10m altitude") + geom_boxplot(fill="blue") 
@@ -468,7 +466,6 @@ grid.arrange(p23,p24,ncol=2,top="Influence du vent à une pression de 900 hPA")
 
 ```
 
-
 # Choix du modèle 
 
 Il s'agit maintenant de trouver un modèle qui explique de façon satisfaisante la prévision "pluie.demain". Nous avons à disposition 46 variables explicatives. Il est donc trop fatidieux de tester tous les modèles possibles.
@@ -477,17 +474,36 @@ Essayons de vérifier quelques corrélations intuitives permettant de ne pas sel
 ## Vérification de corrélations
 
 Testons les corrélations entre les variables de nébulosité, de vitesse de vent, de direction du vent.   
-Il apparait des corrélations statistiquement significatives (p-value de cor.test<5%) entreles variables de direction du vent (entre 10m, 80m d'altitude et sous 900HPA), de vitesse du vent (entre 10m, 80m d'altitude, sous 900HPA), de rafale de vent, de nébulosité (totale / forte / médium / faible).
-   
+Il apparait des corrélations statistiquement significatives (p-value de cor.test<5%) entre les variables de direction du vent (entre 10m, 80m d'altitude et sous 900HPA), de vitesse du vent (entre 10m, 80m d'altitude, sous 900HPA), de rafale de vent, de nébulosité (totale / forte / médium / faible).
    
 ```{r cor}
-# Tests de corrélation 
+# Tests de corrélation
 
-# variables : direction du vent
+#Pression
+# test de correlation
+#cor.test(d.train$Pressure.mean,d.train$Pressure.max)$p.value
+#cor.test(d.train$Pressure.mean,d.train$Pressure.min)$p.value
+#cor.test(d.train$Pressure.max,d.train$Pressure.min)$p.value
+
+#coefficients de correlation
+#Prcormomo=cor(d.train$Pressure.mean,d.train$Pressure.mean, method="pearson")
+#Prcormama=cor(d.train$Pressure.max,d.train$Pressure.max, method="pearson")
+#Prcormimi=cor(d.train$Pressure.min,d.train$Pressure.min, method="pearson")
+#Prcormimo=cor(d.train$Pressure.min,d.train$Pressure.mean, method="pearson")
+#Prcormima=cor(d.train$Pressure.min,d.train$Pressure.max,method="pearson")
+#Prcormoma=cor(d.train$Pressure.mean,d.train$Pressure.max,method="pearson")
+
+#table_cordir=data.frame(Pression=c("min","moy","max"),Pression.min= c(Prcormimi,Prcormimo,Prcormima),Pression.moy=c(Prcormimo,Prcormomo,Prcormoma),Pression.max#c(Prcormima,Prcormoma,Prcormama))
+                     
+#kable(head(table_cordir),format="markdown",caption="correlation des var direction du vent",digits=2)
+
+#Direction du vent
+# test de correlation
 #cor.test(d.train$WindDir10m.mean,d.train$WindDir80m.mean)$p.value
 #cor.test(d.train$WindDir10m.mean,d.train$WindDir900mb.mean)$p.value
 #cor.test(d.train$WindDir80m.mean,d.train$WindDir900mb.mean)$p.value
 
+#coefficients de correlation
 WDcor10m10m=cor(d.train$WindDir10m.mean,d.train$WindDir10m.mean, method="pearson")
 WDcor80m80m=cor(d.train$WindDir80m.mean,d.train$WindDir80m.mean, method="pearson")
 WDcor900900=cor(d.train$WindDir900mb.mean,d.train$WindDir900mb.mean, method="pearson")
@@ -499,11 +515,13 @@ table_cordir=data.frame(Direction_Vent=c("10m","80m","900HPa"),a_10m= c(WDcor10m
                      
 kable(head(table_cordir),format="markdown",caption="correlation des var direction du vent",digits=2)
 
-# variables : vitesse du vent
+#Vitesse du vent
+# test de correlation
 #cor.test(d.train$WindSpeed10m.mean,d.train$WindSpeed80m.mean,method="pearson")$p.value
 #cor.test(d.train$WindSpeed10m.mean,d.train$WindSpeed900mb.mean,method="pearson")$p.value
 #cor.test(d.train$WindSpeed80m.mean,d.train$WindSpeed900mb.mean,method="pearson")$p.value
 
+#coefficients de correlation
 WScor10m10m=cor(d.train$WindSpeed10m.mean,d.train$WindSpeed10m.mean,method="pearson")
 WScor80m80m=cor(d.train$WindSpeed80m.mean,d.train$WindSpeed80m.mean,method="pearson")
 WScor900900=cor(d.train$WindSpeed900mb.mean,d.train$WindSpeed900mb.mean,method="pearson")
@@ -511,15 +529,16 @@ WScor10m80m=cor(d.train$WindSpeed10m.mean,d.train$WindSpeed80m.mean,method="pear
 WScor10m900=cor(d.train$WindSpeed10m.mean,d.train$WindSpeed900mb.mean,method="pearson")
 WScor80m900=cor(d.train$WindSpeed80m.mean,d.train$WindSpeed900mb.mean,method="pearson")
 
-
 table_corvit=data.frame(Vitesse_Vent=c("10m","80m","900HPa"),a_10m=c(WScor10m10m,WScor10m80m,WScor10m900), a_80m=c(WScor10m80m,WScor80m80m,WScor80m900),sous_900HPa=c(WScor10m900,WScor80m900,WScor900900))
 kable(head(table_corvit), format="markdown",caption="correlation des var vitesse du vent", digits=2)
 
-#variables :  rafale de vent
+#Rafale de vent
+# test de correlation
 #cor.test(d.train$WindGust.min,d.train$WindGust.mean,method="pearson")$p.value
 #cor.test(d.train$WindGust.min,d.train$WindGust.max,method="pearson")$p.value
 #cor.test(d.train$WindGust.mean,d.train$WindGust.max,method="pearson")$p.value
 
+#coefficients de correlation
 WGcorminmin=cor(d.train$WindGust.min,d.train$WindGust.min,method="pearson")
 WGcormaxmax=cor(d.train$WindGust.max,d.train$WindGust.max,method="pearson")
 WGcormoymoy=cor(d.train$WindGust.mean,d.train$WindGust.mean,method="pearson")
@@ -527,11 +546,11 @@ WGcorminmean=cor(d.train$WindGust.min,d.train$WindGust.mean,method="pearson")
 WGcorminmax=cor(d.train$WindGust.min,d.train$WindGust.max,method="pearson")
 WGcormeanmax=cor(d.train$WindGust.mean,d.train$WindGust.max,method="pearson")
 
-
 table_corraf=data.frame(Rafale_Vent=c("min","moy","max"),min=c(WGcorminmin,WGcorminmean,WGcorminmax), moy=c(WGcorminmean,WGcormoymoy,WGcormeanmax),max=c(WGcorminmax,WGcormeanmax,WGcormaxmax))
 kable(head(table_corraf), format="markdown",caption="correlation des var rafale de vent",digits=2)
 
-#variables :  nébulosité
+#Nébulosité
+#tests de correlation
 #cor.test(d.train$TotalCloud.mean,d.train$HighCloud.mean,method="pearson")$p.value
 #cor.test(d.train$TotalCloud.mean,d.train$MediumCloud.mean,method="pearson")$p.value
 #cor.test(d.train$TotalCloud.mean,d.train$LowCloud.mean,method="pearson")$p.value
@@ -539,6 +558,7 @@ kable(head(table_corraf), format="markdown",caption="correlation des var rafale 
 #cor.test(d.train$LowCloud.mean,d.train$HighCloud.mean,method="pearson")$p.value
 #cor.test(d.train$MediumCloud.mean,d.train$LowCloud.mean,method="pearson")$p.value
 
+#coefficients de correlation
 Clcortot=cor(d.train$TotalCloud.mean,d.train$TotalCloud.mean,method="pearson")
 Clcorhigh=cor(d.train$HighCloud.mean,d.train$HighCloud.mean,method="pearson")
 Clcormedium=cor(d.train$MediumCloud.mean,d.train$MediumCloud.mean,method="pearson")
@@ -554,73 +574,64 @@ Clcormedlow=cor(d.train$MediumCloud.mean,d.train$LowCloud.mean,method="pearson")
 table_corcloud=data.frame(Nebulosite_Moyenne=c("Totale","Forte","Medium","Faible"),Totale=c(Clcortot,Clcortothigh,Clcortotmed,Clcortotlow),Forte=c(Clcortothigh,Clcorhigh,Clcorhighmed,Clcorhighlow), Medium=c(Clcortotmed,Clcorhighmed,Clcormedium,Clcormedlow), Faible=c(Clcortotlow,Clcorhighlow,Clcormedlow,Clcorlow))
 kable(head(table_corcloud), format="markdown", caption="correlation des var nébulosité",digits=2)
 
-
 ```
-Des corrrélations fortes existent entre :  
 
-     + les directions du vent à 10m et à 80m    
-     + les vitesses de vent à 10m, à 80m et sous 900HPa  
-     + les rafales de vent minimum et moyenne  
-     + les nébulosités totale, faible et médium  
-     + les nébulosités forte et médium  
+Des corrélations fortes existent entre : 
+
+   + les directions du vent à 10m et à 80m    
+   + les vitesses de vent à 10m, à 80m et sous 900HPa  
+   + les rafales de vent minimum et moyenne  
+   + les nébulosités totale, faible et médium  
+   + les nébulosités forte et médium  
     
 ## Méthode "exhaustive" 
-Dans un premier temps, utilisons une méthode de choix de modèle "manuelle" en sélectionnant les variables explicatives semblant pertinentes sur la base des influences et correlations observées. Les critères R2, R2 ajusté, CP Mallows, BIC permettront d'identifier les variables à choisir. (min CP Mallows et min BIC)
+Dans un premier temps, utilisons une méthode de choix de modèle "manuelle" en sélectionnant les variables explicatives semblant pertinentes sur la base des influences et correlations observées. Les critères R2, R2 ajusté, CP Mallows, BIC permettent d'identifier les variables à choisir. (min CP Mallows et min BIC)
 
-Illustration de la démarche  :
+Illustration de la démarche en testant plusieurs modèles.
 
   - **Modèle 1** : 10 variables explicatives (choisies à partir des corrélations et influences observées précédemment).  
        + pression moyenne,   
-       + precipitation,
+       + précipitation,
        + nébulosités totale et forte,   
        + vitesse moyenne du vent à 10m,  
        + direction du vent à 10m et sous 900hPa, 
        + ensoleillement  
        + rafale minimum et maximum
-
     
 ```{r choixman1 }
-
-# on crée un vecteur de booléens, tirés aléatoirement tel que 80% du jeu de données soit utilisé pour identifier le modèle et 20% pour verifier l'ecart de prédiction
-train_80 = sample(c(T, F), nrow(d.train), replace = T, prob = c(.8, .2))
-#data=d.train[train_80,]
-
-choixman_mod1=regsubsets(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,int=T,nbest=1,nvmax=8,method="exhaustive",data=d.train)
+choixman_mod1=regsubsets(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,int=T,nbest=1,nvmax=10,method="exhaustive",data=d.train)
 
 plot(choixman_mod1,scale = "Cp",col="green", main="Modèle 1 - Cp Mallows")
 plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 - BIC")
 
 ```
 **Résultat Modèle 1 :**   
-Le niveau minimum des rafales de vent ne semblent pas être des variables pertinentes pour expliquer les prévisions météo du lendemain.
+Les précipitations et l'ensoleillement semblent être des variables peu pertinentes pour expliquer les prévisions météo du lendemain.   
     
-  - **Modèle 2** : 8 variables explicatives : remplacement de la variable vitesse de vent à 10m altitude par celle sous 900hPA et suppresion des variables rafales minimum et précipitation
+  - **Modèle 2** : 8 variables explicatives : remplacement de la variable vitesse de vent à 10m altitude par celle sous 900hPA et suppresion des variables ensoleillement et précipitation
     + pression moyenne,   
     + nébulosités totale et forte,   
     + vitesse maximum du vent sous 900hPA,  
     + direction du vent à 10m et sous 900hPA,  
-    + ensoleillement  
-    + rafales de vent max   
+    + rafales de vent max  et min 
 
 ```{r choixman2 }
 
-choixman_mod2=regsubsets(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,int=T,nbest=1,nvmax=6,method="exhaustive",data=d.train)
+choixman_mod2=regsubsets(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,int=T,nbest=1,nvmax=8,method="exhaustive",data=d.train)
 
 plot(choixman_mod2,scale = "Cp",col="green", main="Modèle 2 - Cp Mallows")
 plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
 
 ```
 **Résultat Modèle 2** :  
-Après observation des résultats sur les modèle 1 et 2, on constate que les 4 variables les plus pertinentes sont la pression atmosphérique, les nébulosité totale et forte, la direction du vent sous 900HPa.
+Après observation des résultats sur les modèles 1 et 2, on constate que les 4 variables les plus pertinentes sont la pression atmosphérique, les nébulosité totale et forte, la direction du vent sous 900HPa.   
 
   - **Modèle 3** : 4 variables explicatives (modèle minimal : selection des variables min BIC et AIC)
     + pression moyenne,   
     + nébulosité totale et forte,   
     + direction du vent sous 900hPA  
-
     
 ```{r choixman3 }
-
 choixman_mod3=regsubsets(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train)
 
 
@@ -628,39 +639,41 @@ plot(choixman_mod3,scale = "Cp",col="green", main="Modèle 3 - Cp Mallows")
 plot(choixman_mod3,scale = "bic", col="green", main="Modèle 3 - BIC")
 
 ```
-** Résultat Modèle 3 ** :
+** Résultat Modèle 3 ** :  
 Les 4 variables du modèle 3 confirment leur pertinence à expliquer la météo du lendemain.  
-Testons un modèle plus complet en introduisant le rayonnement solaire au modèle 2.
+Testons un modèle plus complet en introduisant le rayonnement solaire au modèle 2.   
+    
 
-- **Modèle 4** : 8 variables explicatives : modèle 2 +rayonnement solaire
+- **Modèle 4** : 9 variables explicatives : modèle 2 +rayonnement solaire
     + pression moyenne,   
     + rayonnement solaire,
     + nébulosités totale et forte,   
     + vitesse maximum du vent sous 900hPA,  
     + direction du vent à 10m et sous 900hPA, 
-    + ensoleillement,  
-    + rafales de vent max
+    + rafales de vent max, min
 
 ```{r choixman4 }
 
-choixman_mod4=regsubsets(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max, int=T,nbest=1,nvmax=10,method="exhaustive",data=d.train)
+choixman_mod4=regsubsets(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min, int=T,nbest=1,nvmax=9,method="exhaustive",data=d.train)
 
 plot(choixman_mod4,scale = "Cp",col="green", main="Modèle 4 - Cp Mallows")
 plot(choixman_mod4,scale = "bic", col="green", main="Modèle 4 - BIC")
 ```
 
-- **Modèle 5** : 8 variables explicatives : modèle 3 - vitesse du vent sous 900HPa
+- **Modèle 5** : 11 variables explicatives : modèle 4 + neige + humidité moyenne
     + pression moyenne,   
     + rayonnement solaire,
     + nébulosités totale et forte,   
+    + vitesse maximum du vent sous 900hPA,  
     + direction du vent à 10m et sous 900hPA, 
-    + ensoleillement,  
-    + rafales de vent max 
+    + rafales de vent max et min
+    + neige
+    + humidité moyenne
 
 
 ```{r choixman5 }
 
-choixman_mod5=regsubsets(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max, int=T,nbest=1,nvmax=10,method="exhaustive",data=d.train)
+choixman_mod5=regsubsets(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean, int=T,nbest=1,nvmax=11,method="exhaustive",data=d.train)
 
 plot(choixman_mod5,scale = "Cp",col="green", main="Modèle 5 - Cp Mallows")
 plot(choixman_mod5,scale = "bic", col="green", main="Modèle 5 - BIC")
@@ -676,28 +689,39 @@ Le modèle utilisé sera le modèle logistique : en effet, il permet d'expliquer
 
 Commençons par tester le modèle 1 (cf.methode exhaustive).
 
-- **Modèle 1** : 10 variables explicatives
+- **Modèle 1** : 10 variables explicatives proposées
 
 **Déroulement de la sélection de variables** :
-    + étape 1 : le critère AIC de la variable pression atmosphérique est le plus bas et est inférieur à l'AIC de référence (none).  
-    => choix de la variable pression atmosphérique comme variable explicative  
-    + étape 2 : le critère AIC de la variable direction du vent sous 900HPa est le plus bas et est inférieur à l'AIC de référence (none).  
-    => choix de la variable direction du vent sous 900HPa comme variable explicative
-    + étape 3 : => choix de la variable nébulosité forte sous 900HPa comme variable explicative
-    + étape 4 : => choix de la variable nébulosité totale sous 900HPa comme variable explicative
-    + étape 5 : les AIC  des variables restantes sont supérieurs à AIC de référence   
-    => sélection de variables explicatives est terminée.  
+
+  + Etape 1 : le critère AIC de la variable pression atmosphérique est le plus bas et est inférieur à l'AIC de référence (none).  
+    => choix de la variable pression atmosphérique comme variable explicative    
     
-**Résultat Modèle 1** : les variables sélectionnées sont 
-    + pression atmosphérique, 
-    + direction du vent sous 900hPA,
-    + nébulosités totale et forte   
+  + Etape 2 : le critère AIC de la variable direction du vent sous 900HPa est le plus bas et est inférieur à l'AIC de référence (none).   
+             => choix de la variable direction du vent sous 900HPa comme variable explicative
+    
+  + Etape 3 : => choix de la variable nébulosité forte  comme variable explicative
+    
+  + Etape 4 : => choix de la variable nébulosité totale comme variable explicative 
+  
+  + Etape 5 : => choix de la variable rafale maximum comme variable explicative
+  
+  + Etape 6 : => choix de la variable vitesse du vent à 10m comme variable explicative
+  
+  + Etape 7 : les AIC  des variables restantes sont supérieurs à AIC de référence   
+             => sélection de variables explicatives est terminée.  
+    
+**Résultat Modèle 1** : 6 variables sont sélectionnées
+
+  + pression atmosphérique, 
+  + direction du vent sous 900hPA,
+  + nébulosités totale et forte 
+  + rafale de vent max
+  + vitesse du vent à 10m
     
  
-    
 ```{r choixprog_mod1}
 # modèle 1
-step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,direction="both")
+step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train,direction="both")
 
 mod1=glm(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train,family=binomial)
 
@@ -720,18 +744,20 @@ dfdeviance_mod0=df.residual(mod0)
 
 ```
 
-- **Modèle 2** : 8 variables explicatives   
+- **Modèle 2** : 8 variables explicatives proposées
 
-**Résultat Modèle 2** : les variables selectionnées sont  
-    + pression atmosphérique, 
-    + direction du vent sous 900hPA,
-    + nébulosités totale et forte  
+**Résultat Modèle 2** : 5 variables sont selectionnées
+
+   + pression atmosphérique, 
+   + direction du vent sous 900hPA,
+   + nébulosités totale et forte,
+   + vitesse du vent à 900HPa
 
 ```{r choixprog_mod2}
 # modèle 2
-step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,direction="both")
+step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,direction="both")
 
-mod2=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,data=d.train,family=binomial)
+mod2=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,family=binomial)
 
 #aic
 aic_mod2=AIC(mod2)
@@ -743,17 +769,18 @@ dfdeviance_mod2=df.residual(mod2)
 ```
 
 
-  - **Modèle 3** : 4 variables explicatives   
+  - **Modèle 3** : 4 variables explicatives proposées  
   
-  **Résultat Modèle 3** : Toutes les variables sont sélectionnées.   
-    + pression atmosphérique, 
-    + direction du vent sous 900hPA,
-    + nébulosités totale et forte  
+**Résultat Modèle 3** : Toutes les variables sont sélectionnées.   
+  
+  + pression atmosphérique, 
+  + direction du vent sous 900hPA,
+  + nébulosités totale et forte  
     
 ```{r choixprog_mod3}
 
 # modèle 3
-step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,data=d.train[train_80,],direction="both")
+step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,data=d.train,direction="both")
 
 mod3=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,data=d.train,family=binomial)
 
@@ -767,19 +794,22 @@ dfdeviance_mod3=df.residual(mod3)
 
 ```
 
-
-  - **Modèle 4** : 8 variables explicatives  
+  - **Modèle 4** : 9 variables explicatives proposées 
     
-**Résultat Modèle 4** : les variables selectionnées sont 
-    + pression atmosphérique, 
-    + direction du vent sous 900hPA,
-    + nébulosités totale et forte  
+**Résultat Modèle 4** : 7 variables sont selectionnées
+
+   + pression atmosphérique, 
+   + direction du vent sous 900hPA et à 10m,
+   + nébulosités totale et forte,  
+   + vitesse du vent à 900HPa,
+   + rayonnement solaire
+  
 ```{r choixprog_mod4}
 
 # modèle 4
-step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot,data=d.train[train_80,],direction="both")
+step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,direction="both")
 
-mod4=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot,data=d.train,family=binomial)
+mod4=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,family=binomial)
 
 #aic
 aic_mod4=AIC(mod4)
@@ -791,14 +821,23 @@ dfdeviance_mod4=df.residual(mod4)
 
 ```
 
-  - **Modèle 5** : 8 variables explicatives
+  - **Modèle 5** : 11 variables explicatives proposées
+  
+  **Résultat Modèle 5** : 8 variables sont selectionnées 
+
+   + pression atmosphérique, 
+   + direction du vent sous 900hPA et à 10m,
+   + nébulosités totale et forte,  
+   + rafale de vent maximum,
+   + neige,
+   + rayonnement solaire
     
 ```{r choixprog_mod5}
 
 # modèle 5
-step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,data=d.train[train_80,],direction="both")
+step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean,data=d.train,direction="both")
 
-mod5=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,data=d.train,family=binomial)
+mod5=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean,data=d.train,family=binomial)
 
 #aic
 aic_mod5=AIC(mod5)
@@ -814,11 +853,14 @@ dfdeviance_mod5=df.residual(mod5)
 
 ```{r crit}
 
-table_res2=data.frame(Modele=c("Modèle nul","Modèle 1","Modèle 3","Modèle 4","Modèle 5"),AIC=c(aic_mod0,aic_mod1,aic_mod3,aic_mod4,aic_mod5),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod3,deviance_mod4,deviance_mod5),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5))
+table_res2=data.frame(Modele=c("Modèle nul","Modèle 1","Modèle 2","Modèle 3","Modèle 4","Modèle 5"),AIC=c(aic_mod0,aic_mod1,aic_mod2,aic_mod3,aic_mod4,aic_mod5),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod2,deviance_mod3,deviance_mod4,deviance_mod5),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod2,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5))
                      
 kable(head(table_res2), format="markdown", digits=0)
 
 ```
+**Resultat de la méthode progressive* :   
+Les meilleurs modèles sont les 4 et 5  : ils présentent le critère AIC le plus bas   
+    
     
 # Validation du modèle 
 
@@ -864,57 +906,62 @@ pchisq0_mod5=pchisq(deviance_mod0 - deviance_mod5, dfdeviance_mod0 - dfdeviance_
 pchisqsat_mod5=pchisq(deviance_mod5, dfdeviance_mod5, lower = F)
 
 
-```
+table_res3=data.frame(Modele=c("Modèle 1","Modèle 2","Modèle 3","Modèle 4","Modèle 5"),pvalue.Deviance.nulle=c(pchisq0_mod1,pchisq0_mod2,pchisq0_mod3,pchisq0_mod4,pchisq0_mod5),pvalue.Deviance.saturee=c(pchisqsat_mod1,pchisqsat_mod2,pchisqsat_mod3,pchisqsat_mod4,pchisqsat_mod5))
+                     
+kable(head(table_res3), format="markdown", digits=4)
 
-  + Modèle 1  
-   p_valeur Deviance nulle : `r pchisq0_mod1`  
-   p_valeur Deviance saturée : `r pchisqsat_mod1`  
-   
-   + Modèle 2  
-   p_valeur Deviance nulle : `r pchisq0_mod2`  
-   p_valeur Deviance saturée : `r pchisqsat_mod2`  
-   
-   + Modèle 3  
-   p_valeur Deviance nulle : `r pchisq0_mod3`  
-   p_valeur Deviance saturée : `r pchisqsat_mod3`  
-   
-   + Modèle 4  
-   p_valeur Deviance nulle : `r pchisq0_mod4`  
-   p_valeur Deviance saturée : `r pchisqsat_mod4`  
-   
-   + Modèle 5  
-   p_valeur Deviance nulle : `r pchisq0_mod5`  
-   p_valeur Deviance saturée : `r pchisqsat_mod5`
-   
+```
 
 ##Test anova
 Il s'agit de comparer 2 modèles imbriqués et de déterminer le "meilleur" des 2 modèles à partir de la p_value du test. si la p-value est < au seuil (ex: 5%) alors le modèle avec le plus de covariables est le meilleur.
 
- - Modèle 2 vs Modèle 3 : p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
+ - Modèle 2 vs Modèle 3 :   
+ p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
 
 ```{r anova1}
 anova(mod2, mod3, test = "LRT")
 ```
 
- - Modèle 3 vs Modèle 4 p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
+ - Modèle 3 vs Modèle 4 :     
+ p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
 
 ```{r anova2}
 anova(mod3, mod4, test = "LRT")
 
 ``` 
 
-- Modèle 3 vs Modèle 5 p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
+- Modèle 3 vs Modèle 5 :   
+p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le modèle 5
 
 ```{r anova3}
 anova(mod3, mod5, test = "LRT")
 
 ``` 
 
+- Modèle 2 vs Modèle 4 :   
+p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le modèle 4
+
+```{r anova4}
+anova(mod2, mod4, test = "LRT")
+
+``` 
+
+- Modèle 2 vs Modèle 5 :   
+p-valeur > 5%, le meilleur modèle est celui 
+
+```{r anova5}
+anova(mod2, mod5, test = "LRT")
+
+``` 
 ##Validation croisée  
 
 Il s'agit de comparer 2 modèles à partir de leur la précision prédictive ; plus la prédiction sera proche de la vraie valeur (moyenne (|prediction-vraie valeur|) est petite), meilleure sera la capacité prédictive du modèle.   
    
 ```{r validcroi}
+# on crée un vecteur de booléens, tirés aléatoirement tels que 80% du jeu de données soit utilisé pour identifier le modèle et 20% pour verifier l'ecart de prédiction
+train_80 = sample(c(T, F), nrow(d.train), replace = T, prob = c(.8, .2))
+#data=d.train[train_80,]
+
 #prédiction sur le modèle 1
 mod1.80=glm(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train[train_80,],family=binomial)
 pred_mod1=predict(mod1.80,d.train[!train_80,],type="response")
@@ -940,30 +987,20 @@ mod5.80=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighClo
 pred_mod5=predict(mod5.80,d.train[!train_80,],type="response")
 mean_mod5=mean(abs(pred_mod5-d.train[!train_80,"pluie.demain.bin"]),na.rm=T)
 
+table_res4=data.frame(Modele=c("Modèle 1","Modèle 2","Modèle 3","Modèle 4","Modèle 5"),erreur=c(mean_mod1,mean_mod2,mean_mod3,mean_mod4,mean_mod5))
+                     
+kable(head(table_res4), format="markdown", digits=4)
+
 ```
 
-  - Modèle 1 :
-   `r mean_mod1`
-   
-  - Modèle 2 :
-   `r mean_mod2`
-
-  - Modèle 3 :
-   `r mean_mod3`
-   
-  - Modèle 4 :
-   `r mean_mod4`
-   
-   - Modèle 5 :
-   `r mean_mod5`  
-   
+  
 ##Caractéristiques du modèle choisi  
 
-Le modèle 3 a les caratéristiques suivantes :
+Le modèle 5 a les caratéristiques suivantes :
 
 ```{r affichecoef}
 
-kableExtra::kable(summary(mod3)$coefficients, format="markdown", digits=3) %>%
+kableExtra::kable(summary(mod5)$coefficients, format="markdown", digits=3) %>%
 kable_styling(full_width = F)
 
 
