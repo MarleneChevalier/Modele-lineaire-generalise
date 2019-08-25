@@ -1,2 +1,2 @@
 # PluieBale
-EMSBD-Devoir modèle linéaire généralisé-Pluie à Bâle
+EMSBD-Devoir modèle linéaire généralisé/choix de modèle/R -Pluie à Bâle
