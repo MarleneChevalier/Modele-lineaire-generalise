@@ -639,7 +639,7 @@ plot(choixman_mod3,scale = "Cp",col="green", main="Modèle 3 - Cp Mallows")
 plot(choixman_mod3,scale = "bic", col="green", main="Modèle 3 - BIC")
 
 ```
-** Résultat Modèle 3 ** :  
+**Résultat Modèle 3** :  
 Les 4 variables du modèle 3 confirment leur pertinence à expliquer la météo du lendemain.  
 Testons un modèle plus complet en introduisant le rayonnement solaire au modèle 2.   
     
@@ -691,24 +691,24 @@ Commençons par tester le modèle 1 (cf.methode exhaustive).
 
 - **Modèle 1** : 10 variables explicatives proposées
 
-**Déroulement de la sélection de variables** :
+**Déroulement de la sélection de variables explicatives** :  
 
-  + Etape 1 : le critère AIC de la variable pression atmosphérique est le plus bas et est inférieur à l'AIC de référence (none).  
-    => choix de la variable pression atmosphérique comme variable explicative    
+   - Etape 1 : le critère AIC de la variable pression atmosphérique est le plus bas et est inférieur à l'AIC de référence (none).  
+   **=> choix de la variable pression atmosphérique**    
     
-  + Etape 2 : le critère AIC de la variable direction du vent sous 900HPa est le plus bas et est inférieur à l'AIC de référence (none).   
-             => choix de la variable direction du vent sous 900HPa comme variable explicative
+   - Etape 2 : le critère AIC de la variable direction du vent sous 900HPa est le plus bas et est inférieur à l'AIC de référence (none).   
+   **=> choix de la variable direction du vent sous 900HPa**
     
-  + Etape 3 : => choix de la variable nébulosité forte  comme variable explicative
+   - Etape 3 : **=> choix de la variable nébulosité forte**
     
-  + Etape 4 : => choix de la variable nébulosité totale comme variable explicative 
+   - Etape 4 : **=> choix de la variable nébulosité totale**
   
-  + Etape 5 : => choix de la variable rafale maximum comme variable explicative
+   - Etape 5 : **=> choix de la variable rafale maximum**
   
-  + Etape 6 : => choix de la variable vitesse du vent à 10m comme variable explicative
+   - Etape 6 : **=> choix de la variable vitesse du vent à 10m **
   
-  + Etape 7 : les AIC  des variables restantes sont supérieurs à AIC de référence   
-             => sélection de variables explicatives est terminée.  
+   - Etape 7 : les AIC  des variables restantes sont supérieurs à AIC de référence   
+   **=> sélection de variables explicatives est terminée**  
     
 **Résultat Modèle 1** : 6 variables sont sélectionnées
 
@@ -723,7 +723,9 @@ Commençons par tester le modèle 1 (cf.methode exhaustive).
 # modèle 1
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train,direction="both")
 
-mod1=glm(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train,family=binomial)
+mod1.cpl=glm(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train,family=binomial)
+
+mod1=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir900mb.mean+WindGust.max,data=d.train,family=binomial)
 
 #aic
 aic_mod1=AIC(mod1)
@@ -757,7 +759,9 @@ dfdeviance_mod0=df.residual(mod0)
 # modèle 2
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,direction="both")
 
-mod2=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,family=binomial)
+mod2.cpl=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,family=binomial)
+
+mod2=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train,family=binomial)
 
 #aic
 aic_mod2=AIC(mod2)
@@ -809,7 +813,9 @@ dfdeviance_mod3=df.residual(mod3)
 # modèle 4
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,direction="both")
 
-mod4=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,family=binomial)
+mod4.cpl=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,family=binomial)
+
+mod4=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean,data=d.train,family=binomial)
 
 #aic
 aic_mod4=AIC(mod4)
@@ -837,7 +843,9 @@ dfdeviance_mod4=df.residual(mod4)
 # modèle 5
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean,data=d.train,direction="both")
 
-mod5=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean,data=d.train,family=binomial)
+mod5.cpl=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindDir10m.mean+WindDir900mb.mean+WindGust.max+Snow.tot,data=d.train,family=binomial)
+
+mod5=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Snow.tot,data=d.train,family=binomial)
 
 #aic
 aic_mod5=AIC(mod5)
@@ -849,17 +857,19 @@ dfdeviance_mod5=df.residual(mod5)
 
 ```
 
+**Les 5 modèles sont réduits aux variables selectionnées dans la méthode progressive.**  
 
+**AIC et déviance des modèles réduits**
 
 ```{r crit}
 
-table_res2=data.frame(Modele=c("Modèle nul","Modèle 1","Modèle 2","Modèle 3","Modèle 4","Modèle 5"),AIC=c(aic_mod0,aic_mod1,aic_mod2,aic_mod3,aic_mod4,aic_mod5),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod2,deviance_mod3,deviance_mod4,deviance_mod5),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod2,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5))
+table_res2=data.frame(Modele=c("Modèle nul","Modèle 1 réduit","Modèle 2 réduit","Modèle 3","Modèle 4 réduit","Modèle 5 réduit"),AIC=c(aic_mod0,aic_mod1,aic_mod2,aic_mod3,aic_mod4,aic_mod5),Deviance=c(deviance_mod0,deviance_mod1,deviance_mod2,deviance_mod3,deviance_mod4,deviance_mod5),Df=c(dfdeviance_mod0,dfdeviance_mod1,dfdeviance_mod2,dfdeviance_mod3,dfdeviance_mod4,dfdeviance_mod5))
                      
 kable(head(table_res2), format="markdown", digits=0)
 
 ```
-**Resultat de la méthode progressive* :   
-Les meilleurs modèles sont les 4 et 5  : ils présentent le critère AIC le plus bas   
+**Résultat de la méthode progressive** :   
+Le meilleur modèle est le 5 (le critère AIC le plus bas). Les modèles 1 et 4 sont également de bons modèles : ils affichent un critère AIC légèrement supérieur. 
     
     
 # Validation du modèle 
@@ -906,7 +916,7 @@ pchisq0_mod5=pchisq(deviance_mod0 - deviance_mod5, dfdeviance_mod0 - dfdeviance_
 pchisqsat_mod5=pchisq(deviance_mod5, dfdeviance_mod5, lower = F)
 
 
-table_res3=data.frame(Modele=c("Modèle 1","Modèle 2","Modèle 3","Modèle 4","Modèle 5"),pvalue.Deviance.nulle=c(pchisq0_mod1,pchisq0_mod2,pchisq0_mod3,pchisq0_mod4,pchisq0_mod5),pvalue.Deviance.saturee=c(pchisqsat_mod1,pchisqsat_mod2,pchisqsat_mod3,pchisqsat_mod4,pchisqsat_mod5))
+table_res3=data.frame(Modele=c("Modèle 1 réduit","Modèle 2 réduit","Modèle 3","Modèle 4 réduit","Modèle 5 réduit"),pvalue.Deviance.nulle=c(pchisq0_mod1,pchisq0_mod2,pchisq0_mod3,pchisq0_mod4,pchisq0_mod5),pvalue.Deviance.saturee=c(pchisqsat_mod1,pchisqsat_mod2,pchisqsat_mod3,pchisqsat_mod4,pchisqsat_mod5))
                      
 kable(head(table_res3), format="markdown", digits=4)
 
@@ -915,15 +925,15 @@ kable(head(table_res3), format="markdown", digits=4)
 ##Test anova
 Il s'agit de comparer 2 modèles imbriqués et de déterminer le "meilleur" des 2 modèles à partir de la p_value du test. si la p-value est < au seuil (ex: 5%) alors le modèle avec le plus de covariables est le meilleur.
 
- - Modèle 2 vs Modèle 3 :   
- p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
+ - Modèle 1 vs Modèle 3 :   
+ p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le modèle 1
 
 ```{r anova1}
-anova(mod2, mod3, test = "LRT")
+anova(mod1, mod3, test = "LRT")
 ```
 
  - Modèle 3 vs Modèle 4 :     
- p-valeur > 5%, le meilleur modèle est celui avec le moins de covariables : le modèle 3
+ p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le modèle 4
 
 ```{r anova2}
 anova(mod3, mod4, test = "LRT")
@@ -937,81 +947,196 @@ p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le mo
 anova(mod3, mod5, test = "LRT")
 
 ``` 
+**Résultat test anova** : les modèles avec le plus de covariables (1, 4, 5) sont jours préférés au modèle minimal (modèle 3).Le modèle 5 affiche la plus petite p-valeur du test anova vs modèle 3. 
 
-- Modèle 2 vs Modèle 4 :   
-p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le modèle 4
-
-```{r anova4}
-anova(mod2, mod4, test = "LRT")
-
-``` 
-
-- Modèle 2 vs Modèle 5 :   
-p-valeur > 5%, le meilleur modèle est celui 
-
-```{r anova5}
-anova(mod2, mod5, test = "LRT")
-
-``` 
 ##Validation croisée  
 
-Il s'agit de comparer 2 modèles à partir de leur la précision prédictive ; plus la prédiction sera proche de la vraie valeur (moyenne (|prediction-vraie valeur|) est petite), meilleure sera la capacité prédictive du modèle.   
+Il s'agit de comparer 2 modèles à partir de leur précision prédictive ; plus la prédiction sera proche de la vraie valeur , meilleure sera la capacité prédictive du modèle.  La mesure de l'erreur de prédiction est :  
+**erreur prédiction = moyenne (|prédiction - vraie valeur|)**
+
+Les prédictions sont calculées pour chaque modèle réduit sur un echantillon de 80% de la base d'entrainement. Elles sont comparées aux vraies valeurs de 20% de l'échantillon de la base d'entrainement.
    
 ```{r validcroi}
 # on crée un vecteur de booléens, tirés aléatoirement tels que 80% du jeu de données soit utilisé pour identifier le modèle et 20% pour verifier l'ecart de prédiction
 train_80 = sample(c(T, F), nrow(d.train), replace = T, prob = c(.8, .2))
 #data=d.train[train_80,]
 
-#prédiction sur le modèle 1
-mod1.80=glm(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,data=d.train[train_80,],family=binomial)
-pred_mod1=predict(mod1.80,d.train[!train_80,],type="response")
+# modèle 1 réduit sur 80% de base entrainement
+mod1.80=glm(
+  pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir900mb.mean+WindGust.max,data=d.train[train_80,],
+  family=binomial
+  )
+# prédiction sur 20% base test
+pred_mod1=predict(mod1.80,d.train[!train_80,],type="response")## erreur de prédiction
+# erreur de prédiction
 mean_mod1=mean(abs(pred_mod1-d.train[!train_80,"pluie.demain.bin"]),na.rm=T)
 
-#prédiction sur le modèle 2
-mod2.80=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,data=d.train[train_80,],family=binomial)
+#modèle 2 réduit sur 80% de base entrainement 
+mod2.80=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
+# prédiction sur 20% base test
 pred_mod2=predict(mod2.80,d.train[!train_80,],type="response")
+# erreur de prédiction
 mean_mod2=mean(abs(pred_mod2-d.train[!train_80,"pluie.demain.bin"]),na.rm=T) 
 
-#prédiction sur le modèle 3
+#modèle 3 sur 80% de base entrainement
 mod3.80=glm(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
+# prédiction sur 20% base test
 pred_mod3=predict(mod3.80,d.train[!train_80,],type="response")
+# erreur de prédiction
 mean_mod3=mean(abs(pred_mod3-d.train[!train_80,"pluie.demain.bin"]),na.rm=T)
 
-#prédiction sur le modèle 4
-mod4.80=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot,data=d.train[train_80,],family=binomial)
+#modèle 4 réduit sur 80% de base entrainement
+mod4.80=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean,data=d.train[train_80,],family=binomial)
+# prédiction sur 20% base test
 pred_mod4=predict(mod4.80,d.train[!train_80,],type="response")
+# erreur de prédiction
 mean_mod4=mean(abs(pred_mod4-d.train[!train_80,"pluie.demain.bin"]),na.rm=T)
 
-#prédiction sur le modèle 5
-mod5.80=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max,data=d.train[train_80,],family=binomial)
+#modèle 5 réduit sur 80% de base entrainement
+mod5.80=glm(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+Snow.tot,data=d.train[train_80,],family=binomial)
+# prédiction sur 20% base test
 pred_mod5=predict(mod5.80,d.train[!train_80,],type="response")
+# erreur de prédiction
 mean_mod5=mean(abs(pred_mod5-d.train[!train_80,"pluie.demain.bin"]),na.rm=T)
 
-table_res4=data.frame(Modele=c("Modèle 1","Modèle 2","Modèle 3","Modèle 4","Modèle 5"),erreur=c(mean_mod1,mean_mod2,mean_mod3,mean_mod4,mean_mod5))
+table_res4=data.frame(Modele=c("Modèle 1 réduit" ,"Modèle 3","Modèle 4 réduit","Modèle 5 réduit"),erreur=c(mean_mod1,mean_mod3,mean_mod4,mean_mod5))
                      
 kable(head(table_res4), format="markdown", digits=4)
 
 ```
 
-  
+Avec le modèle 5, les erreurs de prédiction sont les plus basses.
+
 ##Caractéristiques du modèle choisi  
 
-Le modèle 5 a les caratéristiques suivantes :
+Le modèle 5 (réduit) apparait comme le meilleur modèle . Il a les caratéristiques suivantes :
 
 ```{r affichecoef}
-
-kableExtra::kable(summary(mod5)$coefficients, format="markdown", digits=3) %>%
-kable_styling(full_width = F)
-
-
+#kableExtra::kable(summary(mod5)$coefficients, format="markdown", digits=6) %>%
+#kable_styling(full_width = F,)
+kable(summary(mod5)$coefficients, format="markdown", digits=6)
 
 ```
 
+Les coefficients sont significatifs (p-value < 5%) concernant toutes les covariables sauf le niveau de chute de neige et la direction du vent à 10m. Leur influence est positive sur la probabilité d'anticiper de la pluie lelendemain, sauf pour la pression atmosphérique : l'augmentation de la pression atmosphérique du jour diminue la probabilité de prévoir de la pluie pour le jour d'après. 
    
 # Prévision de la météo du lendemain 
 
+Les prévisions de pluie sont calculées à partir du modèle 5 réduit sur les données du fichier test *meteo.test.csv*    
+(fichier en sortie : *Meteo pred.csv*)
+
+
 ```{r predic}
 
+prev=predict(mod5,newdata=d.test,type = "response")
+d.test$pluie.demain[(prev>=0.5)]=TRUE
+d.test$pluie.demain[(prev<0.5)]=FALSE
+write.csv2(d.test, "Meteo pred.csv")
+```
 
+Sur l'ensemble du fichier test (277 journées entre janvier 2011 et juin 2018), la prévision  de jours avec pluie est de 50.2%. Les prévisions de pluie importantes sont sur les mois de mars, mai, juin et juillet ; les moins importantes sont celles pour les mois de septembre, octobre et décembre. (résultats proches des observations, sauf sur mars )
+
+Les graphiques présentant l'influence des variables explicatives sur la prévision météo du lendemain réalisés cette fois sur les données de la base de test montrent des résultats proches des graphiques précédents (graphes 4 à 15 réalisés sur la base d'entrainement).
+
+
+```{r graphe predic}
+# graphique des prévisions
+theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="bold"),plot.subtitle=element_text(hjust=0.5,size=12),axis.title=element_text(hjust=0.5,size=10)))
+
+# influence de la température
+p4b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Temp.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 4b", x="Précipitation du jour (mm)", y="Température (°C)",col="Prévision lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p5b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Temp.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 5b",x="",y="Température (°C)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p4b,p5b,ncol=2,top="  Influence de la température du jour sur la prévision météo du lendemain")
+  
+# influence Précipitation et humidité
+p6b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Humid.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 6b", x="Précipitation du jour (mm)", y="Humidité (%)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p7b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Humid.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 7b",x="",y="Humidité (%)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p6b,p7b,ncol=2,top="Influence de l'humidité du jour sur la prévision météo du lendemain")
+
+# influence Précipitation et pression atmosphérique
+p8b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Pressure.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 8b", x="Précipitation du jour (mm)", y="Pression (hPA)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p9b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Pressure.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 9b",x="",y="Pression (hPA)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p8b,p9b,ncol=2,top="Influence de la pression atmosphérique du jour sur la prévision météo du lendemain")
+
+# influence Précipitation et nébulosité
+p10b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=TotalCloud.mean,col=pluie.demain)) +
+  labs(subtitle="graphe 10b", x="Précipitation du jour (mm)", y="Nébulosité (%)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p11b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = TotalCloud.mean, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 11b",x="",y="Nébulosité (%)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p10b,p11b,ncol=2,top="Influence de la nébulosité du jour sur la prévision météo du lendemain")
+
+# influence Précipitation et ensoleillement
+
+p12b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Sunshine.tot,col=pluie.demain)) +
+  labs(subtitle="graphe 12b", x="Précipitation du jour (mm)", y="Ensoleillement (minute)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p13b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Sunshine.tot, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 13b",x="",y="Ensoleillement (minute)",fill="Prévision lendemain" ) + 
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p12b,p13b,ncol=2,top="Influence de l'ensoleillement du jour sur la prévision météo du lendemain")
+
+# influence Précipitation et rafale de vent
+p14b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=WindGust.max,col=pluie.demain)) +
+  labs(subtitle="graphe 14b", x="Précipitation du jour (mm)", y="Rafale de vent max (km/h)",col="Prévision du lendemain") +
+  geom_point() +
+scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+
+p15b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = WindGust.max, fill = pluie.demain)) +
+  geom_boxplot() + 
+  labs(subtitle="graphe 15b",x="",y="Rafale de vent max(km/h)",fill="Prévision lendemain" ) +
+  scale_x_discrete(labels=c("","")) +  
+  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+
+grid.arrange(p14b,p15b,ncol=2,top="Influence des rafales de vent du jour sur la prévision météo du lendemain")
 
 ```
+
+# Les bords du Rhin à Bâle au soleil et sous la pluie ...
+
+<center>                         
+![](C:\Users\Marlène\Desktop\Projet R - MLG\Bale5-2.jpg)
+
+       
+                  
+![](C:\Users\Marlène\Desktop\Projet R - MLG\Bale4-pluie-2.jpg)
+</center>
+
