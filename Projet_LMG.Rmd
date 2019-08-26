@@ -236,14 +236,14 @@ theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="
 
 # graphique p1 : précipitations mensuelles moyennes
 p1=ggplot(data=d.precipmonth, mapping=aes(x = as.factor(Month), y = MeanPrecip)) +
-  geom_bar(stat="identity", col="black",fill="blue",width = 1) + 
+  geom_bar(stat="identity", col="black",fill="deepskyblue3",width = 1) + 
   labs(subtitle="graphe1 : Moyenne",x="", y="Précipitations (mm)" ) +  
   scale_y_continuous(breaks=seq(0,3,0.5),limits=c(0,3)) +
   scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec"))
 
 # graphique p2 : précipitations mensuelles moyennes et extremes
 p2=ggplot(data=d.train, mapping=aes(x = as.factor(Month), y = Precip.tot)) +
-  geom_boxplot(fill="blue", width = 1) + 
+  geom_boxplot(fill="deepskyblue3", width = 1) + 
   labs(subtitle="graphe 2 : Moyenne et Extrèmes",x="",y="Précipitations (mm)" ) +
   scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec"))
 
@@ -266,7 +266,7 @@ ggplot(data=d.train, mapping=aes(x = as.factor(Month), fill=pluie.auj)) +
   labs(subtitle="graphe 3 : Nombre de jours avec et sans pluie", x="", y="Nombre de jours", fill="" ) +
   geom_bar(col="black", position ="dodge") +
   scale_x_discrete(labels=c("Jan","Fev","Mar","Avr","Mai","Juin","Juil","Aou", "Sep", "Oct","Nov","Dec")) + 
- scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+ scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 ```
 
 ##Les observations liées aux prévisions de précipitations
@@ -288,7 +288,7 @@ Examinons maintenant le comportement des variables météorologiques au regard d
    - **La vitesse et la direction du vent** de la journée semblent impacter significativement les prévisions pour le lendemain (*cf. graphes 16 à 24*). Les vents du nord et d'ouest amènent des pluie plus abondantes que les vents du sud et d'est (*cf. graphes 16 à 18*).
 Les vents d'ouest quelque soit leur vitesse sont souvent signe de pluie en journée et conduit à prévoir une journée du lendemain pluvieuse (*cf. graphes 19 à 24*).
 
-Avec ces observations graphiques, on a l'impression que la pression athmosphérique, la nébulosité, l'ensoleillement, les caractéristiques du vent d'une journée ont un impact sur la prévision météo pour le lendemain.
+D'après ces observations graphiques, on a l'impression que la pression athmosphérique, la nébulosité, l'ensoleillement, les caractéristiques du vent d'une journée ont un impact sur la prévision météo pour le lendemain.
 
 ```{r lienvar}
 # calcul des directions de vent par quart N-E-S-O : WindDir10m.mean.quart / WindDir80m.mean.quart / WindDir900mb.mean.quart 
@@ -317,13 +317,13 @@ theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="
 p4=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Temp.mean,col=pluie.demain)) +
   labs(subtitle="graphe 4", x="Précipitation du jour (mm)", y="Température (°C)",col="Prévision lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p5=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Temp.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 5",x="",y="Température (°C)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p4,p5,ncol=2,top="  Influence de la température du jour sur la prévision météo du lendemain")
   
@@ -331,13 +331,13 @@ grid.arrange(p4,p5,ncol=2,top="  Influence de la température du jour sur la pr�
 p6=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Humid.mean,col=pluie.demain)) +
   labs(subtitle="graphe 6", x="Précipitation du jour (mm)", y="Humidité (%)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p7=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Humid.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 7",x="",y="Humidité (%)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p6,p7,ncol=2,top="Influence de l'humidité du jour sur la prévision météo du lendemain")
 
@@ -345,13 +345,13 @@ grid.arrange(p6,p7,ncol=2,top="Influence de l'humidité du jour sur la prévisio
 p8=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Pressure.mean,col=pluie.demain)) +
   labs(subtitle="graphe 8", x="Précipitation du jour (mm)", y="Pression (hPA)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p9=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Pressure.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 9",x="",y="Pression (hPA)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p8,p9,ncol=2,top="Influence de la pression atmosphérique du jour sur la prévision météo du lendemain")
 
@@ -360,13 +360,13 @@ grid.arrange(p8,p9,ncol=2,top="Influence de la pression atmosphérique du jour s
 p10=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=TotalCloud.mean,col=pluie.demain)) +
   labs(subtitle="graphe 10", x="Précipitation du jour (mm)", y="Nébulosité (%)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p11=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = TotalCloud.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 11",x="",y="Nébulosité (%)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p10,p11,ncol=2,top="Influence de la nébulosité du jour sur la prévision météo du lendemain")
 
@@ -376,13 +376,13 @@ grid.arrange(p10,p11,ncol=2,top="Influence de la nébulosité du jour sur la pr�
 p12=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=Sunshine.tot,col=pluie.demain)) +
   labs(subtitle="graphe 12", x="Précipitation du jour (mm)", y="Ensoleillement (minute)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p13=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = Sunshine.tot, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 13",x="",y="Ensoleillement (minute)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p12,p13,ncol=2,top="Influence de l'ensoleillement du jour sur la prévision météo du lendemain")
 
@@ -390,25 +390,25 @@ grid.arrange(p12,p13,ncol=2,top="Influence de l'ensoleillement du jour sur la pr
 p14=ggplot(data=d.train, mapping=aes(x = Precip.tot,y=WindGust.max,col=pluie.demain)) +
   labs(subtitle="graphe 14", x="Précipitation du jour (mm)", y="Rafale de vent max (km/h)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p15=ggplot(data=d.train, mapping=aes(x = pluie.demain, y = WindGust.max, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 15",x="",y="Rafale de vent max(km/h)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p14,p15,ncol=2,top="Influence des rafales de vent du jour sur la prévision météo du lendemain")
 
 # précipitations du jour et sens du vent
 p16=ggplot(data=d.train, mapping=aes(x = QuartWDir10m, y =Precip.tot )) +
-  labs(subtitle="graphe 16 ", y="Précipitation du jour (mm)", x="Dir.à 10m altitude") + geom_boxplot(fill="blue") 
+  labs(subtitle="graphe 16 ", y="Précipitation du jour (mm)", x="Dir.à 10m altitude") + geom_boxplot(fill="deepskyblue3") 
 
 p17=ggplot(data=d.train, mapping=aes(x = QuartWDir80m, y =Precip.tot )) +
-  labs(subtitle="graphe 17", y="", x="Dir.à 80m altitude") + geom_boxplot(fill="blue")
+  labs(subtitle="graphe 17", y="", x="Dir.à 80m altitude") + geom_boxplot(fill="deepskyblue3")
 
 p18=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb, y =Precip.tot )) +
-  labs(subtitle="graphe 18", y="", x="Dir.à pression de 900hPA") + geom_boxplot(fill="blue")
+  labs(subtitle="graphe 18", y="", x="Dir.à pression de 900hPA") + geom_boxplot(fill="deepskyblue3")
 
 grid.arrange(p16,p17,p18,ncol=3,top="Influence de la direction du vent sur les précipitations du jour")
 
@@ -419,13 +419,13 @@ grid.arrange(p16,p17,p18,ncol=3,top="Influence de la direction du vent sur les p
 p19=ggplot(data=d.train, mapping=aes(x = QuartWDir10m , y =WindSpeed10m.mean, col=pluie.auj, size=10 )) +
   labs(subtitle="graphe 19", y="Vitesse du vent (km/h)", x="Direction du vent", col="Météo du jour") + 
   geom_point(size=5) +
- scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+ scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 # Météo du lendemain
 p20=ggplot(data=d.train, mapping=aes(x = QuartWDir10m , y =WindSpeed10m.mean, col=pluie.demain )) +
   labs(subtitle="graphe 20", y=" ", x="Direction du vent", col="Météo du lendemain", size="" ) + 
   geom_point(size=5) +
- scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+ scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
    
 grid.arrange(p19,p20,ncol=2,top="Influence du vent à 10 m d'altitude")
 
@@ -436,13 +436,13 @@ grid.arrange(p19,p20,ncol=2,top="Influence du vent à 10 m d'altitude")
 p21=ggplot(data=d.train, mapping=aes(x = QuartWDir80m , y =WindSpeed80m.mean, col=pluie.auj, size=10 )) +
   labs(subtitle="graphe 21", y="Vitesse du vent (km/h)", x="Direction du vent", col="Météo du jour") + 
   geom_point(size=5) +
- scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+ scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 # Météo du lendemain
 p22=ggplot(data=d.train, mapping=aes(x = QuartWDir80m , y =WindSpeed80m.mean, col=pluie.demain )) +
   labs(subtitle="graphe 22", y=" ", x="Direction du vent", col="Météo du lendemain", size="" ) + 
   geom_point(size=5) +
- scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+ scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
    
 grid.arrange(p21,p22,ncol=2,top="Influence du vent à 80 m d'altitude")
 
@@ -454,13 +454,13 @@ grid.arrange(p21,p22,ncol=2,top="Influence du vent à 80 m d'altitude")
 p23=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb , y =WindSpeed900mb.mean, col=pluie.auj, size=10 )) +
   labs(subtitle="graphe 23", y="Vitesse du vent (km/h)", x="Direction du vent", col="Météo du jour") + 
   geom_point(size=5) +
- scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+ scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 # Météo du lendemain
 p24=ggplot(data=d.train, mapping=aes(x = QuartWDir900mb , y =WindSpeed900mb.mean, col=pluie.demain )) +
   labs(subtitle="graphe 24", y=" ", x="Direction du vent", col="Météo du lendemain", size="" ) + 
   geom_point(size=5) +
- scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+ scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
    
 grid.arrange(p23,p24,ncol=2,top="Influence du vent à une pression de 900 hPA")
 
@@ -468,13 +468,15 @@ grid.arrange(p23,p24,ncol=2,top="Influence du vent à une pression de 900 hPA")
 
 # Choix du modèle 
 
-Il s'agit maintenant de trouver un modèle qui explique de façon satisfaisante la prévision "pluie.demain". Nous avons à disposition 46 variables explicatives. Il est donc trop fatidieux de tester tous les modèles possibles.
-Essayons de vérifier quelques corrélations intuitives permettant de ne pas selectionner des variables redondantes.
+Il s'agit maintenant de trouver un modèle qui explique de façon satisfaisante la prévision "pluie.demain". Nous avons à disposition 46 variables explicatives. Il est donc fastidieux de tester tous les modèles possibles.
+Essayons de vérifier quelques corrélations intuitives permettant de ne pas sélectionner des variables redondantes.
 
 ## Vérification de corrélations
 
 Testons les corrélations entre les variables de nébulosité, de vitesse de vent, de direction du vent.   
 Il apparait des corrélations statistiquement significatives (p-value de cor.test<5%) entre les variables de direction du vent (entre 10m, 80m d'altitude et sous 900HPA), de vitesse du vent (entre 10m, 80m d'altitude, sous 900HPA), de rafale de vent, de nébulosité (totale / forte / médium / faible).
+
+**Coefficients de corrélation** :
    
 ```{r cor}
 # Tests de corrélation
@@ -576,7 +578,7 @@ kable(head(table_corcloud), format="markdown", caption="correlation des var néb
 
 ```
 
-Des corrélations fortes existent entre : 
+Des corrélations fortes (coef de corrélation proche de 1 ) existent entre : 
 
    + les directions du vent à 10m et à 80m    
    + les vitesses de vent à 10m, à 80m et sous 900HPa  
@@ -585,132 +587,150 @@ Des corrélations fortes existent entre :
    + les nébulosités forte et médium  
     
 ## Méthode "exhaustive" 
-Dans un premier temps, utilisons une méthode de choix de modèle "manuelle" en sélectionnant les variables explicatives semblant pertinentes sur la base des influences et correlations observées. Les critères R2, R2 ajusté, CP Mallows, BIC permettent d'identifier les variables à choisir. (min CP Mallows et min BIC)
+Dans un premier temps, utilisons une méthode de choix de modèle "manuelle" en sélectionnant les variables explicatives semblant pertinentes sur la base des influences et correlations observées. Les critères CP Mallows, BIC permettent d'identifier ds variables explicatives pertinentes (variables avec CP Mallows minimal / BIC minimal).
 
 Illustration de la démarche en testant plusieurs modèles.
 
-  - **Modèle 1** : 10 variables explicatives (choisies à partir des corrélations et influences observées précédemment).  
-       + pression moyenne,   
-       + précipitation,
-       + nébulosités totale et forte,   
-       + vitesse moyenne du vent à 10m,  
-       + direction du vent à 10m et sous 900hPa, 
-       + ensoleillement  
-       + rafale minimum et maximum
+**Modèle 1** : 10 variables explicatives (choisies à partir des corrélations et influences observées précédemment).  
+
+  + pression moyenne,   
+  + précipitation,
+  + nébulosités totale et forte,   
+  + vitesse moyenne du vent à 10m,  
+  + direction du vent à 10m et sous 900hPa, 
+  + ensoleillement  
+  + rafales de vent minimum et maximum
     
 ```{r choixman1 }
 choixman_mod1=regsubsets(pluie.demain.bin~Pressure.mean+Precip.tot+TotalCloud.mean+HighCloud.mean+WindSpeed10m.mean+WindDir10m.mean+WindDir900mb.mean+Sunshine.tot+WindGust.max+WindGust.min,int=T,nbest=1,nvmax=10,method="exhaustive",data=d.train)
 
-plot(choixman_mod1,scale = "Cp",col="green", main="Modèle 1 - Cp Mallows")
-plot(choixman_mod1,scale = "bic", col="green", main="Modèle 1 - BIC")
+plot(choixman_mod1,scale = "Cp",col="chartreuse", main="Modèle 1 - Cp Mallows")
+plot(choixman_mod1,scale = "bic", col="chartreuse", main="Modèle 1 - BIC")
 
 ```
+
+
 **Résultat Modèle 1 :**   
 Les précipitations et l'ensoleillement semblent être des variables peu pertinentes pour expliquer les prévisions météo du lendemain.   
     
-  - **Modèle 2** : 8 variables explicatives : remplacement de la variable vitesse de vent à 10m altitude par celle sous 900hPA et suppresion des variables ensoleillement et précipitation
-    + pression moyenne,   
-    + nébulosités totale et forte,   
-    + vitesse maximum du vent sous 900hPA,  
-    + direction du vent à 10m et sous 900hPA,  
-    + rafales de vent max  et min 
+**Modèle 2** : 8 variables explicatives : remplacement de la variable vitesse de vent à 10m altitude par celle sous 900hPA et suppresion des variables ensoleillement et précipitation.
+
+  + pression moyenne,   
+  + nébulosités totale et forte,   
+  + vitesse maximum du vent sous 900hPA,  
+  + direction du vent à 10m et sous 900hPA,  
+  + rafales de vent max et min 
 
 ```{r choixman2 }
 
 choixman_mod2=regsubsets(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,int=T,nbest=1,nvmax=8,method="exhaustive",data=d.train)
 
-plot(choixman_mod2,scale = "Cp",col="green", main="Modèle 2 - Cp Mallows")
-plot(choixman_mod2,scale = "bic", col="green", main="Modèle 2 - BIC")
+plot(choixman_mod2,scale = "Cp",col="chartreuse", main="Modèle 2 - Cp Mallows")
+plot(choixman_mod2,scale = "bic", col="chartreuse", main="Modèle 2 - BIC")
 
 ```
-**Résultat Modèle 2** :  
-Après observation des résultats sur les modèles 1 et 2, on constate que les 4 variables les plus pertinentes sont la pression atmosphérique, les nébulosité totale et forte, la direction du vent sous 900HPa.   
 
-  - **Modèle 3** : 4 variables explicatives (modèle minimal : selection des variables min BIC et AIC)
-    + pression moyenne,   
-    + nébulosité totale et forte,   
-    + direction du vent sous 900hPA  
+
+**Résultat Modèle 2** :  
+Après observation des résultats sur les modèles 1 et 2, on constate que les 4 variables les plus pertinentes sont la pression atmosphérique, les nébulosités totale et forte, la direction du vent sous 900HPa.   
+
+**Modèle 3** : 4 variables explicatives (modèle minimal : selection des variables min BIC et AIC)
+
+   + pression moyenne,   
+   + nébulosité totale et forte,   
+   + direction du vent sous 900hPA  
     
 ```{r choixman3 }
 choixman_mod3=regsubsets(pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,int=T,nbest=1,nvmax=4,method="exhaustive",data=d.train)
 
 
-plot(choixman_mod3,scale = "Cp",col="green", main="Modèle 3 - Cp Mallows")
-plot(choixman_mod3,scale = "bic", col="green", main="Modèle 3 - BIC")
+plot(choixman_mod3,scale = "Cp",col="chartreuse", main="Modèle 3 - Cp Mallows")
+plot(choixman_mod3,scale = "bic", col="chartreuse", main="Modèle 3 - BIC")
 
 ```
+
+
 **Résultat Modèle 3** :  
 Les 4 variables du modèle 3 confirment leur pertinence à expliquer la météo du lendemain.  
 Testons un modèle plus complet en introduisant le rayonnement solaire au modèle 2.   
     
 
-- **Modèle 4** : 9 variables explicatives : modèle 2 +rayonnement solaire
-    + pression moyenne,   
-    + rayonnement solaire,
-    + nébulosités totale et forte,   
-    + vitesse maximum du vent sous 900hPA,  
-    + direction du vent à 10m et sous 900hPA, 
-    + rafales de vent max, min
+**Modèle 4** : 9 variables explicatives : modèle 2 +rayonnement solaire
+
+  + pression moyenne,   
+  + rayonnement solaire,  
+  + nébulosités totale et forte,   
+  + vitesse maximum du vent sous 900hPA,  
+  + direction du vent à 10m et sous 900hPA,  
+  + rafales de vent max et min  
 
 ```{r choixman4 }
 
 choixman_mod4=regsubsets(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min, int=T,nbest=1,nvmax=9,method="exhaustive",data=d.train)
 
-plot(choixman_mod4,scale = "Cp",col="green", main="Modèle 4 - Cp Mallows")
-plot(choixman_mod4,scale = "bic", col="green", main="Modèle 4 - BIC")
+plot(choixman_mod4,scale = "Cp",col="chartreuse", main="Modèle 4 - Cp Mallows")
+plot(choixman_mod4,scale = "bic", col="chartreuse", main="Modèle 4 - BIC")
 ```
 
-- **Modèle 5** : 11 variables explicatives : modèle 4 + neige + humidité moyenne
-    + pression moyenne,   
-    + rayonnement solaire,
-    + nébulosités totale et forte,   
-    + vitesse maximum du vent sous 900hPA,  
-    + direction du vent à 10m et sous 900hPA, 
-    + rafales de vent max et min
-    + neige
-    + humidité moyenne
+
+Testons un modèle plus complet en incluant le niveau de chite de neige et l'humidité moyenne.
+
+**Modèle 5** : 11 variables explicatives : modèle 4 + neige + humidité moyenne
+
+  + pression moyenne,   
+  + rayonnement solaire,  
+  + nébulosités totale et forte,    
+  + vitesse maximum du vent sous 900hPA,  
+  + direction du vent à 10m et sous 900hPA,  
+  + rafales de vent max et min  
+  + neige  
+  + humidité moyenne  
 
 
 ```{r choixman5 }
 
 choixman_mod5=regsubsets(pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean, int=T,nbest=1,nvmax=11,method="exhaustive",data=d.train)
 
-plot(choixman_mod5,scale = "Cp",col="green", main="Modèle 5 - Cp Mallows")
-plot(choixman_mod5,scale = "bic", col="green", main="Modèle 5 - BIC")
+plot(choixman_mod5,scale = "Cp",col="chartreuse", main="Modèle 5 - Cp Mallows")
+plot(choixman_mod5,scale = "bic", col="chartreuse", main="Modèle 5 - BIC")
 ```
 
 
 ## Méthode "progressive"
 
-Dans cette étape, pour choisir les variables explicatives du modèle, nous allons utiliser une des méthodes pas à pas : la méthode progressive. Elle consiste, à chaque itération, à ajouter au modèle une variable explicative (celle avec le plus petit AIC et tel que cet AIC soit inférieur à l'AIC du modèle nul) et à remettre en cause les variables intégrées aux itérations précédentes.  
+Dans cette étape, pour choisir les variables explicatives du modèle, nous allons utiliser une des méthodes pas à pas : la méthode progressive. Elle consiste, à chaque itération, à ajouter au modèle une variable explicative (celle avec le plus petit AIC et tel que cet AIC soit inférieur à l'AIC du modèle nul) et à remettre en cause les variables intégrées lors des itérations précédentes.  
 
-Le modèle utilisé sera le modèle logistique : en effet, il permet d'expliquer une variable binaire (présence de pluie ou non demain) en fonction de variables explicatives sélectionnées.   
+Le modèle utilisé sera le **modèle logistique** : en effet, il permet d'expliquer une variable binaire (présence de pluie ou non demain) en fonction de variables explicatives sélectionnées.   
   En R : *glm ( pluie.demain ~ variables explicatives, family = binomial )*
 
-Commençons par tester le modèle 1 (cf.methode exhaustive).
+Commençons par tester le modèle 1.
 
-- **Modèle 1** : 10 variables explicatives proposées
+**Modèle 1** : 10 variables explicatives proposées
 
 **Déroulement de la sélection de variables explicatives** :  
 
-   - Etape 1 : le critère AIC de la variable pression atmosphérique est le plus bas et est inférieur à l'AIC de référence (none).  
-   **=> choix de la variable pression atmosphérique**    
+*Etape 1* : le critère AIC de la variable pression atmosphérique est le plus bas et est inférieur à l'AIC de référence (none).  
+-> choix de la variable : **pression atmosphérique**    
     
-   - Etape 2 : le critère AIC de la variable direction du vent sous 900HPa est le plus bas et est inférieur à l'AIC de référence (none).   
-   **=> choix de la variable direction du vent sous 900HPa**
+*Etape 2* : le critère AIC de la variable direction du vent sous 900HPa est le plus bas et est inférieur à l'AIC de référence (none).   
+-> choix de la variable :  **direction du vent sous 900HPa**
     
-   - Etape 3 : **=> choix de la variable nébulosité forte**
+*Etape 3* :   
+-> choix de la variable : **nébulosité forte**
     
-   - Etape 4 : **=> choix de la variable nébulosité totale**
+*Etape 4* : 
+-> choix de la variable : **nébulosité totale**
   
-   - Etape 5 : **=> choix de la variable rafale maximum**
+*Etape 5* : 
+-> choix de la variable **rafale maximum**
   
-   - Etape 6 : **=> choix de la variable vitesse du vent à 10m **
+*Etape 6* : 
+-> choix de la variable **vitesse du vent à 10m **
   
-   - Etape 7 : les AIC  des variables restantes sont supérieurs à AIC de référence   
-   **=> sélection de variables explicatives est terminée**  
+*Etape 7* : les AIC  des variables restantes sont supérieurs à AIC de référence   
+-> **sélection de variables explicatives est terminée**  
     
-**Résultat Modèle 1** : 6 variables sont sélectionnées
+**Résultat Modèle 1** : 6 variables sont sélectionnées = *Modèle 1 réduit*
 
   + pression atmosphérique, 
   + direction du vent sous 900hPA,
@@ -746,16 +766,16 @@ dfdeviance_mod0=df.residual(mod0)
 
 ```
 
-- **Modèle 2** : 8 variables explicatives proposées
+**Modèle 2** : 8 variables explicatives proposées
 
-**Résultat Modèle 2** : 5 variables sont selectionnées
+**Résultat Modèle 2** : 5 variables sont selectionnées = *Modèle 2 réduit*
 
    + pression atmosphérique, 
    + direction du vent sous 900hPA,
    + nébulosités totale et forte,
    + vitesse du vent à 900HPa
 
-```{r choixprog_mod2}
+```{r choixprog_mod2, include=FALSE}
 # modèle 2
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,direction="both")
 
@@ -772,8 +792,7 @@ dfdeviance_mod2=df.residual(mod2)
 
 ```
 
-
-  - **Modèle 3** : 4 variables explicatives proposées  
+**Modèle 3** : 4 variables explicatives proposées  
   
 **Résultat Modèle 3** : Toutes les variables sont sélectionnées.   
   
@@ -781,7 +800,7 @@ dfdeviance_mod2=df.residual(mod2)
   + direction du vent sous 900hPA,
   + nébulosités totale et forte  
     
-```{r choixprog_mod3}
+```{r choixprog_mod3,include=FALSE}
 
 # modèle 3
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+TotalCloud.mean+HighCloud.mean+WindDir900mb.mean,data=d.train,direction="both")
@@ -798,9 +817,9 @@ dfdeviance_mod3=df.residual(mod3)
 
 ```
 
-  - **Modèle 4** : 9 variables explicatives proposées 
+**Modèle 4** : 9 variables explicatives proposées 
     
-**Résultat Modèle 4** : 7 variables sont selectionnées
+**Résultat Modèle 4** : 7 variables sont selectionnées = *Modèle 4 réduit*
 
    + pression atmosphérique, 
    + direction du vent sous 900hPA et à 10m,
@@ -808,7 +827,7 @@ dfdeviance_mod3=df.residual(mod3)
    + vitesse du vent à 900HPa,
    + rayonnement solaire
   
-```{r choixprog_mod4}
+```{r choixprog_mod4, include=FALSE}
 
 # modèle 4
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min,data=d.train,direction="both")
@@ -827,9 +846,9 @@ dfdeviance_mod4=df.residual(mod4)
 
 ```
 
-  - **Modèle 5** : 11 variables explicatives proposées
+**Modèle 5** : 11 variables explicatives proposées
   
-  **Résultat Modèle 5** : 8 variables sont selectionnées 
+**Résultat Modèle 5** : 8 variables sont selectionnées = *Modèle 5 réduit* 
 
    + pression atmosphérique, 
    + direction du vent sous 900hPA et à 10m,
@@ -838,7 +857,7 @@ dfdeviance_mod4=df.residual(mod4)
    + neige,
    + rayonnement solaire
     
-```{r choixprog_mod5}
+```{r choixprog_mod5,include=FALSE}
 
 # modèle 5
 step(glm(pluie.demain.bin~1,data=d.train,family=binomial),pluie.demain.bin~Pressure.mean+Shortwave.tot+TotalCloud.mean+HighCloud.mean+WindSpeed900mb.max+WindDir10m.mean+WindDir900mb.mean+WindGust.max+WindGust.min+Snow.tot+Humid.mean,data=d.train,direction="both")
@@ -868,6 +887,7 @@ table_res2=data.frame(Modele=c("Modèle nul","Modèle 1 réduit","Modèle 2 réd
 kable(head(table_res2), format="markdown", digits=0)
 
 ```
+
 **Résultat de la méthode progressive** :   
 Le meilleur modèle est le 5 (le critère AIC le plus bas). Les modèles 1 et 4 sont également de bons modèles : ils affichent un critère AIC légèrement supérieur. 
     
@@ -922,6 +942,10 @@ kable(head(table_res3), format="markdown", digits=4)
 
 ```
 
+**Résultat du test de déviance** :   
+Les modèles testés sont meilleurs que le modèle nul (sans covariable) mais moins bons que le modèle saturé (46 variables).
+
+
 ##Test anova
 Il s'agit de comparer 2 modèles imbriqués et de déterminer le "meilleur" des 2 modèles à partir de la p_value du test. si la p-value est < au seuil (ex: 5%) alors le modèle avec le plus de covariables est le meilleur.
 
@@ -947,7 +971,7 @@ p-valeur < 5%, le meilleur modèle est celui avec le plus de covariables : le mo
 anova(mod3, mod5, test = "LRT")
 
 ``` 
-**Résultat test anova** : les modèles avec le plus de covariables (1, 4, 5) sont jours préférés au modèle minimal (modèle 3).Le modèle 5 affiche la plus petite p-valeur du test anova vs modèle 3. 
+**Résultat des tests anova** : les modèles avec le plus de covariables (1, 4, 5) sont toujours préférés au modèle minimal (modèle 3). Le modèle 5 affiche la plus petite p-valeur du test anova vs modèle 3. 
 
 ##Validation croisée  
 
@@ -1005,11 +1029,12 @@ kable(head(table_res4), format="markdown", digits=4)
 
 ```
 
-Avec le modèle 5, les erreurs de prédiction sont les plus basses.
+**Résultat de la validation croisée** : les erreurs prédictives des 4 modèles sont proches quelque soit l'échantillon tiré. Mais la plus basse n'est pas obtenue par le meme modèle à chaque tirage. 
 
 ##Caractéristiques du modèle choisi  
 
-Le modèle 5 (réduit) apparait comme le meilleur modèle . Il a les caratéristiques suivantes :
+Le modèle 5 réduit apparait comme le meilleur modèle : critère AIC le plus faible, p-valeur des tests anova vs modèle 3 la plus faible.   
+Il a les caratéristiques suivantes :
 
 ```{r affichecoef}
 #kableExtra::kable(summary(mod5)$coefficients, format="markdown", digits=6) %>%
@@ -1018,7 +1043,7 @@ kable(summary(mod5)$coefficients, format="markdown", digits=6)
 
 ```
 
-Les coefficients sont significatifs (p-value < 5%) concernant toutes les covariables sauf le niveau de chute de neige et la direction du vent à 10m. Leur influence est positive sur la probabilité d'anticiper de la pluie lelendemain, sauf pour la pression atmosphérique : l'augmentation de la pression atmosphérique du jour diminue la probabilité de prévoir de la pluie pour le jour d'après. 
+Les coefficients sont significatifs (p-value < 5%) concernant toutes les covariables sauf le niveau de chute de neige et la direction du vent à 10m. Leur influence est positive sur la probabilité d'anticiper de la pluie pour le lendemain, sauf pour la pression atmosphérique : l'augmentation de la pression atmosphérique du jour diminue la probabilité de prévoir de la pluie pour le jour d'après. 
    
 # Prévision de la météo du lendemain 
 
@@ -1034,9 +1059,11 @@ d.test$pluie.demain[(prev<0.5)]=FALSE
 write.csv2(d.test, "Meteo pred.csv")
 ```
 
-Sur l'ensemble du fichier test (277 journées entre janvier 2011 et juin 2018), la prévision  de jours avec pluie est de 50.2%. Les prévisions de pluie importantes sont sur les mois de mars, mai, juin et juillet ; les moins importantes sont celles pour les mois de septembre, octobre et décembre. (résultats proches des observations, sauf sur mars )
+**Caractéristiques des prévisions calculées**
 
-Les graphiques présentant l'influence des variables explicatives sur la prévision météo du lendemain réalisés cette fois sur les données de la base de test montrent des résultats proches des graphiques précédents (graphes 4 à 15 réalisés sur la base d'entrainement).
+Sur l'ensemble du fichier test (277 journées entre janvier 2011 et juin 2018), la prévision  de jours avec pluie est de 50.2%. Les prévisions de pluie importantes sont sur les mois de mars, mai, juin et juillet ; les moins importantes sont celles pour les mois de septembre, octobre et décembre. (résultats proches des observations cf. 2.1, sauf sur mars )
+
+Les graphiques présentant l'influence des variables explicatives sur la prévision météo du lendemain réalisés cette fois sur les données de la base de test montrent des résultats proches des graphiques précédents (graphes 4 à 15 réalisés sur la base d'entrainement, cf. 2.2).
 
 
 ```{r graphe predic}
@@ -1047,13 +1074,13 @@ theme_set(theme_classic()+theme(plot.title=element_text(hjust=0.5,size=14,face="
 p4b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Temp.mean,col=pluie.demain)) +
   labs(subtitle="graphe 4b", x="Précipitation du jour (mm)", y="Température (°C)",col="Prévision lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p5b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Temp.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 5b",x="",y="Température (°C)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p4b,p5b,ncol=2,top="  Influence de la température du jour sur la prévision météo du lendemain")
   
@@ -1061,13 +1088,13 @@ grid.arrange(p4b,p5b,ncol=2,top="  Influence de la température du jour sur la p
 p6b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Humid.mean,col=pluie.demain)) +
   labs(subtitle="graphe 6b", x="Précipitation du jour (mm)", y="Humidité (%)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p7b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Humid.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 7b",x="",y="Humidité (%)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p6b,p7b,ncol=2,top="Influence de l'humidité du jour sur la prévision météo du lendemain")
 
@@ -1075,13 +1102,13 @@ grid.arrange(p6b,p7b,ncol=2,top="Influence de l'humidité du jour sur la prévis
 p8b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Pressure.mean,col=pluie.demain)) +
   labs(subtitle="graphe 8b", x="Précipitation du jour (mm)", y="Pression (hPA)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p9b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Pressure.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 9b",x="",y="Pression (hPA)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p8b,p9b,ncol=2,top="Influence de la pression atmosphérique du jour sur la prévision météo du lendemain")
 
@@ -1089,13 +1116,13 @@ grid.arrange(p8b,p9b,ncol=2,top="Influence de la pression atmosphérique du jour
 p10b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=TotalCloud.mean,col=pluie.demain)) +
   labs(subtitle="graphe 10b", x="Précipitation du jour (mm)", y="Nébulosité (%)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p11b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = TotalCloud.mean, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 11b",x="",y="Nébulosité (%)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p10b,p11b,ncol=2,top="Influence de la nébulosité du jour sur la prévision météo du lendemain")
 
@@ -1104,13 +1131,13 @@ grid.arrange(p10b,p11b,ncol=2,top="Influence de la nébulosité du jour sur la p
 p12b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=Sunshine.tot,col=pluie.demain)) +
   labs(subtitle="graphe 12b", x="Précipitation du jour (mm)", y="Ensoleillement (minute)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p13b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = Sunshine.tot, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 13b",x="",y="Ensoleillement (minute)",fill="Prévision lendemain" ) + 
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p12b,p13b,ncol=2,top="Influence de l'ensoleillement du jour sur la prévision météo du lendemain")
 
@@ -1118,13 +1145,13 @@ grid.arrange(p12b,p13b,ncol=2,top="Influence de l'ensoleillement du jour sur la 
 p14b=ggplot(data=d.test, mapping=aes(x = Precip.tot,y=WindGust.max,col=pluie.demain)) +
   labs(subtitle="graphe 14b", x="Précipitation du jour (mm)", y="Rafale de vent max (km/h)",col="Prévision du lendemain") +
   geom_point() +
-scale_color_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse")) 
+scale_color_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse")) 
 
 p15b=ggplot(data=d.test, mapping=aes(x = pluie.demain, y = WindGust.max, fill = pluie.demain)) +
   geom_boxplot() + 
   labs(subtitle="graphe 15b",x="",y="Rafale de vent max(km/h)",fill="Prévision lendemain" ) +
   scale_x_discrete(labels=c("","")) +  
-  scale_fill_manual(values=c("yellow","blue"),label=c("journée sans pluie","journée pluvieuse"))
+  scale_fill_manual(values=c("yellow","deepskyblue3"),label=c("journée sans pluie","journée pluvieuse"))
 
 grid.arrange(p14b,p15b,ncol=2,top="Influence des rafales de vent du jour sur la prévision météo du lendemain")
 
