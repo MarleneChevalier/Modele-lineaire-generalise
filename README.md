@@ -1,2 +1,2 @@
 # PluieBale
-EMSBD-Devoir modèle linéaire généralisé/choix de modèle/R -Pluie à Bâle
+Modèle linéaire généralisé/choix de modèle/R - Prévision météo à Bâle
